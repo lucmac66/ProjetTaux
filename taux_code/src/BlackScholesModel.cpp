@@ -42,19 +42,19 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
             
             if (j == 0){
                 simulDomestic(path, i, col, G, dt);
-                col++;
             }
 
             else{
-                simulForeign;
+                simulForeign(path, i, col, G, dt, k, n);
                 col++;
             }
-
             k++;
         }
 
         ///simuler Xi
-
+        for (int l = 0; l < n_; l++){
+            simulRate(path, i, n+l, G, dt);
+        }
     }
 
 }
@@ -70,13 +70,25 @@ void BlackScholesModel::simulDomestic(PnlMat* path, int i, int j, PnlVect* G, do
 }
 
 
-void BlackScholesModel::simulForeign(PnlMat* path, int i, int j, PnlVect* G, double dt){
+void BlackScholesModel::simulForeign(PnlMat* path, int i, int j, PnlVect* G, double dt, int k, int n){
     double st = pnl_mat_get(path, i-1, j);
-    PnlVect* s = pnl_vect_new();
+    PnlVect* s = pnl_vect_new(); ///sigma Si
+    PnlVect* s1 = pnl_vect_new(); ///sigma Xi
     pnl_mat_get_col(s, sigma_, j);
+    pnl_mat_get_col(s1, sigma_, n+k);
+    pnl_vect_plus_vect(s, s1); ///somme des sigma
     double sigma_squared = pnl_vect_norm_two(s)/2;
     double sigma_Wt = pnl_vect_scalar_prod(s, G);
     st *= exp( (pnl_vect_get(r_, 0) - sigma_squared)*dt + sigma_Wt * sqrt(dt));
     pnl_mat_set(path, i, j, st);
 }
 
+void BlackScholesModel::simulRate(PnlMat* path, int i, int j, PnlVect* G, double dt){
+    double st = pnl_mat_get(path, i-1, j);
+    PnlVect* s = pnl_vect_new();
+    pnl_mat_get_col(s, sigma_, j);
+    double sigma_squared = pnl_vect_norm_two(s)/2;
+    double sigma_Wt = pnl_vect_scalar_prod(s, G);
+    st *= exp( (pnl_vect_get(r_, 0) - pnl_vect_get(r_, k) - sigma_squared)*dt + sigma_Wt * sqrt(dt));
+    pnl_mat_set(path, i, j, st);
+}
