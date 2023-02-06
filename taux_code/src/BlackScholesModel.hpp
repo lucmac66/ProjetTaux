@@ -8,11 +8,13 @@
 class BlackScholesModel
 {
   public:
-    int size_;       /// nombre d'actifs du modèle
-    double r_;       /// taux d'intérêt
-    double rho_;     /// paramètre de corrélation
-    PnlVect* sigma_; /// vecteur de volatilités
+    int n_; /// nombre de marchés étrangers
+    PnlVect* size_;  /// nombre d'actifs de chacun des marchés (dans l'ordre : dom, etrangers)
+    PnlVect* r_;     /// taux d'intérêt de chacun des marchés
+    PnlMat* sigma_; /// matrice de correlation
     PnlVect* spot_;  /// valeurs initiales des sous-jacents
+
+    BlackScholesModel(int n, PnlVect* size, PnlVect* r, PnlMat* sigma, PnlVect* spot);
 
     /**
      * Génère une trajectoire du modèle et la stocke dans path
@@ -22,7 +24,11 @@ class BlackScholesModel
      * @param[in] T  maturité
      * @param[in] nbTimeSteps nombre de dates de constatation
      */
+
     void asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* rng);
+
+    void simulDomestic(PnlMat* path, int i, int j, PnlVect* G, double dt);
+    void simulForeign(PnlMat* path, int i, int j, PnlVect* G, double dt);
 
     /**
      * Calcule une trajectoire du modèle connaissant le
