@@ -13,4 +13,4 @@ class Portfolio
         
         Portfolio(int n , int maxN);
         void ChangeAllQuantities(const PnlMat *values, const PnlMat *deltas, int t);
-}
+};
