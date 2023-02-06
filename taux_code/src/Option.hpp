@@ -8,8 +8,8 @@ class Option
 {
   public:
     double T_;        /// maturité
-    int nbTimeSteps_; /// nombre de pas de temps de discrétisation
-    int size_;        /// dimension du modèle, redondant avec BlackScholesModel::size_
+    int size_;
+    double domesticRate_;        /// dimension du modèle, redondant avec BlackScholesModel::size_
     /**
      * Calcule la valeur du payoff sur la trajectoire
      *
@@ -18,5 +18,5 @@ class Option
      * par la fonction asset.
      * @return phi(trajectoire)
      */
-    virtual double payoff(const PnlMat* path) = 0;
+    virtual double payoff(const PnlMat* path, double t) = 0;
 };

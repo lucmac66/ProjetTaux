@@ -40,7 +40,7 @@ add_subdirectory(src/jlparser)
 add_executable(parser-example src/parser_example.cpp)
 target_link_libraries(parser-example jl_parser ${LIBS})
 
-add_executable(mc-example src/mc_example.cpp src/FixedRebalancing.cpp src/GridRebalancing.cpp src/Portfolio.cpp)
+add_executable(mc-example src/mc_example.cpp src/FixedRebalancing.cpp src/GridRebalancing.cpp src/Portfolio.cpp src/CallQuanto.cpp src/CallCurrency.cpp src/QuantoExchange.cpp src/ForeignAsian.cpp)
 target_link_libraries(mc-example jl_parser ${LIBS})
 
 # Print compiler flags
