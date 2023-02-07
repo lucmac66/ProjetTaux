@@ -45,7 +45,7 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
             }
 
             else{
-                simulForeign(path, i, col, G, dt, k, n);
+                simulForeign(path, i, col, G, dt, j-1, n);
                 col++;
             }
             k++;
