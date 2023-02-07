@@ -13,5 +13,7 @@ class MonteCarlo
     double fdStep_;          /*! pas de différence finie */
     long nbSamples_;         /*! nombre de tirages Monte Carlo */
 
-    void priceAndDeltas(const PnlMat* past, double t, double& prix, double& std_dev, PnlVect *deltas, PnlVect *stdDeltas);
+    MonteCarlo(BlackScholesModel* mod, Option* opt, PnlRng* rng, double fdStep, long nbSamples);
+
+    void priceAndDeltas(const PnlMat* past, double t, double& prix, double& std_dev, PnlVect *deltas, PnlVect *stdDeltas, int nbTimeSteps, double epsilon);
 };
