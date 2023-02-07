@@ -187,3 +187,15 @@ void BlackScholesModel::asset(PnlMat* path, double t, double T, int nbTimeSteps,
     }
 
 }
+
+
+
+void BlackScholesModel::shiftAsset(PnlMat* path, PnlMat* past, double epsilon, int row, int column){
+    double st = pnl_mat_get(past, past->m-1, column);
+    double st_shift = st + epsilon;
+    double change = st_shift / st;
+    for (int i = row; i < path->m; i++){
+        double new_value = pnl_mat_get(path, i, column) * change;
+        pnl_mat_set(path, i, column, new_value);
+    }
+}

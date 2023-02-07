@@ -33,6 +33,8 @@ class BlackScholesModel
 
     void asset(PnlMat* path, double t, double T, int nbTimeSteps, PnlRng* rng, PnlMat* past);
 
+    void shiftAsset(PnlMat* path, PnlMat* past, double epsilon, int row, int column);
+
     /**
      * Calcule une trajectoire du modèle connaissant le
      * passé jusqu' à la date t
