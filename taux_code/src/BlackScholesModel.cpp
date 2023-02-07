@@ -20,11 +20,6 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
     ///Initialisation de la première ligne de la matrice path
     pnl_mat_set_row(path, spot_, 0);
 
-    // ///Transformation de Cholesky de la matrice de correlation
-    // PnlMat* sigma_correl = pnl_mat_new();
-    // pnl_mat_clone(sigma_correl, sigma_);
-    // pnl_mat_chol(sigma_correl);
-
     ///variables globales
     double dt = T / nbTimeSteps; /// pas de temps qui apparait dans l'exponentielle
 
@@ -33,75 +28,20 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
         ///remplissage du vecteur G
         pnl_vect_rng_normal(G, n+n_, rng);
 
-        // ///multiplication par la transformée de Cholesky pour avoir la bonne correlation
-        // PnlVect *Gtilde = pnl_mat_mult_vect(sigma_correl, G);
-                
-        // ///colonne actuelle
-        // int col = 0;
-
-        for (int j = 0; j < )
-
-        // for (int j = 0; j < size_->size; j++){
-        //     ///taille du marché en question
-        //     int taille = (int) pnl_vect_get(size_, j);
-            
-        //     if (j == 0){
-        //         for (int m = 0; m < taille; m++){
-        //             simulDomestic(path, i, col, Gtilde, dt);
-        //             col++;
-        //         }
-        //     }
-
-        //     else{
-        //         for (int m = 0; m < taille; m++){
-        //             simulForeign(path, i, col, Gtilde, dt, j-1, n);
-        //             col++;
-        //         }
-        //     }
-        // }
-
-        // ///simuler Xi
-        // for (int l = 0; l < n_; l++){
-        //     simulRate(path, i, n+l, Gtilde, dt, l);
-        // }
+        ///remplissage pour les Stildes
+        for (int j = 0; j < assets_.size; j++){
+            double st = pnl_mat_get(path, i-1, j);
+            st *= exp(assets_[j].drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j].sigma_, G));
+            pnl_mat_set(path, i, j, st);
+        }
+        /// remplissage pour les Xi
+        for (int j = assets_.size; j < assets_.size + currencies_.size; j++){
+            double st = pnl_mat_get(path, i-1, j);
+            st *= exp(currencies_[j].drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(currencies_[j].sigma_, G));
+            pnl_mat_set(path, i, j, st);
+        }
     }
-
 }
-
-void BlackScholesModel::simulDomestic(PnlMat* path, int i, int j, PnlVect* G, double dt){
-    double st = pnl_mat_get(path, i-1, j);
-    PnlVect* s = pnl_vect_new();
-    pnl_mat_get_col(s, sigma_, j);
-    double sigma_squared = pnl_vect_norm_two(s)/2;
-    st *= exp( (pnl_vect_get(r_, 0) - sigma_squared)*dt + pnl_vect_get(G, j) * sqrt(dt));
-    pnl_mat_set(path, i, j, st);
-}
-
-
-void BlackScholesModel::simulForeign(PnlMat* path, int i, int j, PnlVect* G, double dt, int k, int n){
-    double st = pnl_mat_get(path, i-1, j);
-    PnlVect* s = pnl_vect_new(); ///sigma Si
-    PnlVect* s1 = pnl_vect_new(); ///sigma Xi
-    pnl_mat_get_col(s, sigma_, j);
-    pnl_mat_get_col(s1, sigma_, n+k);
-    pnl_vect_plus_vect(s, s1); ///somme des sigma
-    double sigma_squared = pnl_vect_norm_two(s)/2;
-    st *= exp( (pnl_vect_get(r_, 0) - sigma_squared)*dt + pnl_vect_get(G, j) * sqrt(dt));
-    pnl_mat_set(path, i, j, st);
-}
-
-void BlackScholesModel::simulRate(PnlMat* path, int i, int j, PnlVect* G, double dt, int l){
-    double st = pnl_mat_get(path, i-1, j);
-    PnlVect* s = pnl_vect_new();
-    pnl_mat_get_col(s, sigma_, j);
-    double sigma_squared = pnl_vect_norm_two(s)/2;
-    double sigma_Wt = pnl_vect_scalar_prod(s, G);
-    st *= exp( (pnl_vect_get(r_, 0) - pnl_vect_get(r_, l) - sigma_squared)*dt + pnl_vect_get(G, j) * sqrt(dt));
-    pnl_mat_set(path, i, j, st);
-}
-
-
-
 
 void BlackScholesModel::asset(PnlMat* path, double t, double T, int nbTimeSteps, PnlRng* rng, PnlMat* past){
     int n = (int) pnl_vect_sum(size_); 
@@ -113,10 +53,6 @@ void BlackScholesModel::asset(PnlMat* path, double t, double T, int nbTimeSteps,
     ///Génération du vecteur G
     PnlVect* G = pnl_vect_new();
 
-    ///Transformation de Cholesky de la matrice de correlation
-    PnlMat* sigma_correl = pnl_mat_new();
-    pnl_mat_clone(sigma_correl, sigma_);
-    pnl_mat_chol(sigma_correl);
 
     ///variables globales
     double dt = T / nbTimeSteps; /// pas de temps qui apparait dans l'exponentielle
@@ -127,35 +63,21 @@ void BlackScholesModel::asset(PnlMat* path, double t, double T, int nbTimeSteps,
     }
 
     if (dernier_i < nbTimeSteps){
-            pnl_vect_rng_normal(G, n+n_, rng);
-            PnlVect *Gtilde = pnl_mat_mult_vect(sigma_correl, G);
+        pnl_vect_rng_normal(G, n+n_, rng);
 
-            ///traitement des assets domestiques
-            int colonne = 0;
-            for (int i = 0; i < pnl_vect_get(size_, 0); i++){
-                simulDomestic(path, dernier_i, colonne, Gtilde, first_dt);
-                colonne++;
-            }
+        ///remplissage pour les Stildes
+        for (int j = 0; j < assets_.size; j++){
+            double st = pnl_mat_get(path, i-1, j);
+            st *= exp(assets_[j].drift_ *first_dt + sqrt(first_dt) * pnl_vect_scalar_prod(assets_[j].sigma_, G));
+            pnl_mat_set(path, i, j, st);
+        }
 
-            ///traitement des assets étrangers
-            for (int j = 1; j < size_->size; j++){
-                ///taille du marché en question
-                int taille = (int) pnl_vect_get(size_, j);
-
-                for (int m = 0; m < taille; m++){
-                    simulForeign(path, dernier_i, colonne, Gtilde, first_dt, j-1, n);
-                    colonne++;
-                    }
-            }int dernier_i = (int) nbTimeSteps*t/T;
-    double first_dt = t - (dernier_i*T)/nbTimeSteps;
-    if (t == dernier_i * dt){
-        dernier_i++; // t est un tj de la subdivision
-    }
-
-            ///traitement des taux de change
-            for (int l = 0; l < n_; l++){
-                simulRate(path, dernier_i, n+l, Gtilde, first_dt, l);
-            }
+        /// remplissage pour les Xi
+        for (int j = assets_.size; j < assets_.size + currencies_.size; j++){
+            double st = pnl_mat_get(path, i-1, j);
+            st *= exp(currencies_[j].drift_ *first_dt + sqrt(first_dt) * pnl_vect_scalar_prod(currencies_[j].sigma_, G));
+            pnl_mat_set(path, i, j, st);
+        }
     }
 
     ///iteration sur le nombre de dates
@@ -163,34 +85,17 @@ void BlackScholesModel::asset(PnlMat* path, double t, double T, int nbTimeSteps,
         ///remplissage du vecteur G
         pnl_vect_rng_normal(G, n+n_, rng);
 
-        ///multiplication par la transformée de Cholesky pour avoir la bonne correlation
-        PnlVect *Gtilde = pnl_mat_mult_vect(sigma_correl, G);
-                
-        ///colonne actuelle
-        int col = 0;
-
-        for (int j = 0; j < size_->size; j++){
-            ///taille du marché en question
-            int taille = (int) pnl_vect_get(size_, j);
-            
-            if (j == 0){
-                for (int m = 0; m < taille; m++){
-                    simulDomestic(path, i, col, Gtilde, dt);
-                    col++;
-                }
-            }
-
-            else{
-                for (int m = 0; m < taille; m++){
-                    simulForeign(path, i, col, Gtilde, dt, j-1, n);
-                    col++;
-                }
-            }
+        ///remplissage pour les Stildes
+        for (int j = 0; j < assets_.size; j++){
+            double st = pnl_mat_get(path, i-1, j);
+            st *= exp(assets_[j].drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j].sigma_, G));
+            pnl_mat_set(path, i, j, st);
         }
-
-        ///simuler Xi
-        for (int l = 0; l < n_; l++){
-            simulRate(path, i, n+l, Gtilde, dt, l);
+        /// remplissage pour les Xi
+        for (int j = assets_.size; j < assets_.size + currencies_.size; j++){
+            double st = pnl_mat_get(path, i-1, j);
+            st *= exp(currencies_[j].drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(currencies_[j].sigma_, G));
+            pnl_mat_set(path, i, j, st);
         }
     }
 
