@@ -19,7 +19,9 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
     pnl_mat_set_row(path, spot_, 0);
 
     ///Transformation de Cholesky de la matrice de correlation
-    pnl_mat_chol(sigma_);
+    PnlMat* sigma_correl = pnl_mat_new();
+    pnl_mat_clone(sigma_correl, sigma_);
+    pnl_mat_chol(sigma_correl);
 
     ///variables globales
     double dt = T / nbTimeSteps; /// pas de temps qui apparait dans l'exponentielle
@@ -30,6 +32,7 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
         pnl_vect_rng_normal(G, n+n_, rng);
 
         ///multiplication par la transformée de Cholesky pour avoir la bonne correlation
+        PnlVect *Gtilde = pnl_mat_mult_vect(sigma_correl, G);
                 
         /// marché actuel (0 pour domestique, i pour le marché i)
         int k = 0;
@@ -41,11 +44,11 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
             int taille = (int) pnl_vect_get(size_, j);
             
             if (j == 0){
-                simulDomestic(path, i, col, G, dt);
+                simulDomestic(path, i, col, Gtilde, dt);
             }
 
             else{
-                simulForeign(path, i, col, G, dt, j-1, n);
+                simulForeign(path, i, col, Gtilde, dt, j-1, n);
                 col++;
             }
             k++;
@@ -53,7 +56,7 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
 
         ///simuler Xi
         for (int l = 0; l < n_; l++){
-            simulRate(path, i, n+l, G, dt);
+            simulRate(path, i, n+l, Gtilde, dt, l);
         }
     }
 
@@ -64,8 +67,7 @@ void BlackScholesModel::simulDomestic(PnlMat* path, int i, int j, PnlVect* G, do
     PnlVect* s = pnl_vect_new();
     pnl_mat_get_col(s, sigma_, j);
     double sigma_squared = pnl_vect_norm_two(s)/2;
-    double sigma_Wt = pnl_vect_scalar_prod(s, G);
-    st *= exp( (pnl_vect_get(r_, 0) - sigma_squared)*dt + sigma_Wt * sqrt(dt));
+    st *= exp( (pnl_vect_get(r_, 0) - sigma_squared)*dt + pnl_vect_get(G, j) * sqrt(dt));
     pnl_mat_set(path, i, j, st);
 }
 
@@ -78,17 +80,17 @@ void BlackScholesModel::simulForeign(PnlMat* path, int i, int j, PnlVect* G, dou
     pnl_mat_get_col(s1, sigma_, n+k);
     pnl_vect_plus_vect(s, s1); ///somme des sigma
     double sigma_squared = pnl_vect_norm_two(s)/2;
-    double sigma_Wt = pnl_vect_scalar_prod(s, G);
-    st *= exp( (pnl_vect_get(r_, 0) - sigma_squared)*dt + sigma_Wt * sqrt(dt));
+
+    st *= exp( (pnl_vect_get(r_, 0) - sigma_squared)*dt + pnl_vect_get(G, j) * sqrt(dt));
     pnl_mat_set(path, i, j, st);
 }
 
-void BlackScholesModel::simulRate(PnlMat* path, int i, int j, PnlVect* G, double dt){
+void BlackScholesModel::simulRate(PnlMat* path, int i, int j, PnlVect* G, double dt, int l){
     double st = pnl_mat_get(path, i-1, j);
     PnlVect* s = pnl_vect_new();
     pnl_mat_get_col(s, sigma_, j);
     double sigma_squared = pnl_vect_norm_two(s)/2;
     double sigma_Wt = pnl_vect_scalar_prod(s, G);
-    st *= exp( (pnl_vect_get(r_, 0) - pnl_vect_get(r_, k) - sigma_squared)*dt + sigma_Wt * sqrt(dt));
+    st *= exp( (pnl_vect_get(r_, 0) - pnl_vect_get(r_, l) - sigma_squared)*dt + pnl_vect_get(G, j) * sqrt(dt));
     pnl_mat_set(path, i, j, st);
 }
