@@ -1,11 +1,13 @@
 #include "BlackScholesModel.hpp"
 
-BlackScholesModel::BlackScholesModel(int n, PnlVect* size, PnlVect* r, PnlMat* sigma, PnlVect* spot){
+BlackScholesModel::BlackScholesModel(int n, PnlVect* size, PnlVect* r, PnlMat* sigma, PnlVect* spot, vector<RiskyAsset> assets, vector<Currency> currencies){
     n_ = n;
     size_ = size;
     r_ = r;
     sigma_ = sigma;
     spot_ = spot;
+    assets_ = assets;
+    currencies_ = currency;
 }
 
 void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* rng){
@@ -18,10 +20,10 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
     ///Initialisation de la première ligne de la matrice path
     pnl_mat_set_row(path, spot_, 0);
 
-    ///Transformation de Cholesky de la matrice de correlation
-    PnlMat* sigma_correl = pnl_mat_new();
-    pnl_mat_clone(sigma_correl, sigma_);
-    pnl_mat_chol(sigma_correl);
+    // ///Transformation de Cholesky de la matrice de correlation
+    // PnlMat* sigma_correl = pnl_mat_new();
+    // pnl_mat_clone(sigma_correl, sigma_);
+    // pnl_mat_chol(sigma_correl);
 
     ///variables globales
     double dt = T / nbTimeSteps; /// pas de temps qui apparait dans l'exponentielle
@@ -31,35 +33,37 @@ void BlackScholesModel::asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* r
         ///remplissage du vecteur G
         pnl_vect_rng_normal(G, n+n_, rng);
 
-        ///multiplication par la transformée de Cholesky pour avoir la bonne correlation
-        PnlVect *Gtilde = pnl_mat_mult_vect(sigma_correl, G);
+        // ///multiplication par la transformée de Cholesky pour avoir la bonne correlation
+        // PnlVect *Gtilde = pnl_mat_mult_vect(sigma_correl, G);
                 
-        ///colonne actuelle
-        int col = 0;
+        // ///colonne actuelle
+        // int col = 0;
 
-        for (int j = 0; j < size_->size; j++){
-            ///taille du marché en question
-            int taille = (int) pnl_vect_get(size_, j);
+        for (int j = 0; j < )
+
+        // for (int j = 0; j < size_->size; j++){
+        //     ///taille du marché en question
+        //     int taille = (int) pnl_vect_get(size_, j);
             
-            if (j == 0){
-                for (int m = 0; m < taille; m++){
-                    simulDomestic(path, i, col, Gtilde, dt);
-                    col++;
-                }
-            }
+        //     if (j == 0){
+        //         for (int m = 0; m < taille; m++){
+        //             simulDomestic(path, i, col, Gtilde, dt);
+        //             col++;
+        //         }
+        //     }
 
-            else{
-                for (int m = 0; m < taille; m++){
-                    simulForeign(path, i, col, Gtilde, dt, j-1, n);
-                    col++;
-                }
-            }
-        }
+        //     else{
+        //         for (int m = 0; m < taille; m++){
+        //             simulForeign(path, i, col, Gtilde, dt, j-1, n);
+        //             col++;
+        //         }
+        //     }
+        // }
 
-        ///simuler Xi
-        for (int l = 0; l < n_; l++){
-            simulRate(path, i, n+l, Gtilde, dt, l);
-        }
+        // ///simuler Xi
+        // for (int l = 0; l < n_; l++){
+        //     simulRate(path, i, n+l, Gtilde, dt, l);
+        // }
     }
 
 }

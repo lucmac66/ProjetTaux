@@ -1,11 +1,10 @@
 #include "MonteCarlo.hpp"
 
 
-MonteCarlo::MonteCarlo(BlackScholesModel* mod, Option* opt, PnlRng* rng, double fdStep, long nbSamples){
+MonteCarlo::MonteCarlo(BlackScholesModel* mod, Option* opt, PnlRng* rng, long nbSamples){
     mod_ = mod;
     opt_ = opt;
     rng_ = rng;
-    fdStep_ = fdStep;
     nbSamples_ = nbSamples_;
 }
 

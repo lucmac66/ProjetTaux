@@ -3,18 +3,27 @@
 #include "pnl/pnl_random.h"
 #include "pnl/pnl_vector.h"
 #include "pnl/pnl_matrix.h"
+#include "RiskyAsset.hpp"
+#include "Currency.hpp"
+#include <string>
+#include <iostream>
+#include <vector>
+
+using namespace std;
 
 /// \brief Modèle de Black Scholes
 class BlackScholesModel
 {
   public:
     int n_; /// nombre de marchés étrangers
+    vector<RiskyAsset> assets_;
+    vector<Currency> currencies_;
     PnlVect* size_;  /// nombre d'actifs de chacun des marchés (dans l'ordre : dom, etrangers)
     PnlVect* r_;     /// taux d'intérêt de chacun des marchés
     PnlMat* sigma_; /// matrice de correlation
     PnlVect* spot_;  /// valeurs initiales des sous-jacents
 
-    BlackScholesModel(int n, PnlVect* size, PnlVect* r, PnlMat* sigma, PnlVect* spot);
+    BlackScholesModel(int n, PnlVect* size, PnlVect* r, PnlMat* sigma, PnlVect* spot, std::vector<RiskyAsset> assets, std::vector<Currency> currencies);
 
     /**
      * Génère une trajectoire du modèle et la stocke dans path
