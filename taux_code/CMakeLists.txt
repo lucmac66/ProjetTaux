@@ -34,6 +34,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_subdirectory(src/jlparser)
 
+# Find nlohmann_json to parse json files
+# Add nlohmann_json::nlohmann_json to target_link_libraries
+find_package(nlohmann_json REQUIRED)
+
+set(fxhedging_hdrs  json_reader.hpp)
+add_library(fx_hedging json_reader.cpp ${fxhedging_hdrs})
+target_link_libraries(fx_hedging ${PNL_LIBRARIES} nlohmann_json::nlohmann_json)
+
+
 ### Ne rien modifier dans la partie au dessus de cette ligne.
 
 # Test the parser
