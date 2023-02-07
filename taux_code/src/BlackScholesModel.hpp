@@ -33,7 +33,7 @@ class BlackScholesModel
 
     void asset(PnlMat* path, double t, double T, int nbTimeSteps, PnlRng* rng, PnlMat* past);
 
-    void shiftAsset(PnlMat* path, PnlMat* past, double epsilon, int row, int column);
+    void shiftAsset(PnlMat* path, PnlMat* past, double epsilon, double t, int column);
 
     /**
      * Calcule une trajectoire du modèle connaissant le
@@ -62,5 +62,6 @@ class BlackScholesModel
      * @param[in] d indice du sous-jacent à shifter
      * @param[in] timestep pas de constatation du sous-jacent
      */
-    void shiftAsset(PnlMat* shift_path, const PnlMat* path, int d, double h, double t, double timestep);
+    void shiftAsset(PnlMat* path, PnlMat* past, double T, int nbTimeSteps, double epsilon, double t, int column);
+
 };

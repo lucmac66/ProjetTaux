@@ -142,7 +142,11 @@ void BlackScholesModel::asset(PnlMat* path, double t, double T, int nbTimeSteps,
                     simulForeign(path, dernier_i, colonne, Gtilde, first_dt, j-1, n);
                     colonne++;
                     }
-            }
+            }int dernier_i = (int) nbTimeSteps*t/T;
+    double first_dt = t - (dernier_i*T)/nbTimeSteps;
+    if (t == dernier_i * dt){
+        dernier_i++; // t est un tj de la subdivision
+    }
 
             ///traitement des taux de change
             for (int l = 0; l < n_; l++){
@@ -190,10 +194,18 @@ void BlackScholesModel::asset(PnlMat* path, double t, double T, int nbTimeSteps,
 
 
 
-void BlackScholesModel::shiftAsset(PnlMat* path, PnlMat* past, double epsilon, int row, int column){
+void BlackScholesModel::shiftAsset(PnlMat* path, PnlMat* past, double T, int nbTimeSteps, double epsilon, double t, int column){
     double st = pnl_mat_get(past, past->m-1, column);
     double st_shift = st + epsilon;
     double change = st_shift / st;
+
+    double dt = T / nbTimeSteps;
+    int row = (int) nbTimeSteps*t/T;
+    double first_dt = t - (row*T)/nbTimeSteps;
+    if (t == row * dt){
+        row++; // t est un tj de la subdivision
+    }
+
     for (int i = row; i < path->m; i++){
         double new_value = pnl_mat_get(path, i, column) * change;
         pnl_mat_set(path, i, column, new_value);
