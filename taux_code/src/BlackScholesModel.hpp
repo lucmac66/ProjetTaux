@@ -31,6 +31,8 @@ class BlackScholesModel
     void simulForeign(PnlMat* path, int i, int j, PnlVect* G, double dt, int k, int n);
     void simulRate(PnlMat* path, int i, int j, PnlVect* G, double dt, int l);
 
+    void asset(PnlMat* path, double t, double T, int nbTimeSteps, PnlRng* rng, PnlMat* past);
+
     /**
      * Calcule une trajectoire du modèle connaissant le
      * passé jusqu' à la date t
