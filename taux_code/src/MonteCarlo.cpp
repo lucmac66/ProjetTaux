@@ -12,7 +12,6 @@ MonteCarlo::MonteCarlo(BlackScholesModel* mod, Option* opt, PnlRng* rng, long nb
 void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, double& std_dev, PnlVect *deltas, PnlVect *stdDeltas, double epsilon){
     ///création de la matrice path
     PnlMat* path = pnl_mat_create(this->mod_->importantDates_->size, past->n);
-
     PnlMat* pathEpsilonP = pnl_mat_create(this->mod_->importantDates_->size, past->n);
     PnlMat* pathEpsilonN = pnl_mat_create(this->mod_->importantDates_->size, past->n);
 
@@ -25,10 +24,10 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
     double deltapayoff;
     ///tirages Monte Carlo
     for (int i = 0; i < nbSamples_; i++){
-        pnl_mat_print(path);
         mod_->asset(path, past, t,  rng_);
-        pnl_mat_print(path);
         payoff = opt_->payoff(path, t);
+        std::cout << " " << std::endl;
+        pnl_mat_print(path);
         prix += payoff;
         std_dev += payoff * payoff;
         for (int j = 0; j < path->n; j++){
@@ -50,4 +49,8 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
 
     prix /= nbSamples_;
     std_dev = sqrt(abs(std_dev/nbSamples_ - prix*prix));
+
+    pnl_mat_free(&path);
+    pnl_mat_free(&pathEpsilonP);
+    pnl_mat_free(&pathEpsilonN);
 }

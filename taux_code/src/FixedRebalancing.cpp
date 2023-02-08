@@ -6,7 +6,7 @@ FixedRebalancing::FixedRebalancing(int period){
 }
 
 bool FixedRebalancing::IsRebalanceDate(int dateT){
-    if (dateT - this->lastRebalance > this->period){
+    if (dateT - this->lastRebalance >= this->period){
         this->lastRebalance = dateT;
         return true;
     }

@@ -82,29 +82,29 @@ int main(int argc, char **argv) {
 
 
     int numberOfDaysPerYear = jsonParams.at("NumberOfDaysInOneYear").get<int>();
-    double maturity = jsonParams.at("Option").at("MaturityInDays").get<int>() / double (numberOfDaysPerYear);
+    int maturity = jsonParams.at("Option").at("MaturityInDays").get<int>();
     std::string label = jsonParams.at("Option").at("Type").get<std::string>();
     Option *opt;
     if(label == "call_currency"){
         double strike = jsonParams.at("Option").at("Strike").get<int>();
-        opt = new CallCurrency(maturity, strike, domesticRate, currencies[0]->foreignRate_);
+        opt = new CallCurrency(maturity, strike, domesticRate, currencies[0]->foreignRate_, numberOfDaysPerYear);
     }else{
         if(label == "call_quanto"){
             double strike = jsonParams.at("Option").at("Strike").get<int>();
-            opt = new CallQuanto(maturity, strike, domesticRate);
+            opt = new CallQuanto(maturity, strike, domesticRate, numberOfDaysPerYear);
         }
         else{
             if(label == "foreign_asian"){
-                opt = new ForeignAsian(maturity, domesticRate);
+                opt = new ForeignAsian(maturity, domesticRate, numberOfDaysPerYear);
             }
             else{
                 if(label == "quanto_exchange"){
                     double strike = jsonParams.at("Option").at("Strike").get<int>();
-                    opt = new QuantoExchange(maturity, strike, domesticRate);
+                    opt = new QuantoExchange(maturity, strike, domesticRate, numberOfDaysPerYear);
                 }
                 else{
                     double strike = jsonParams.at("Option").at("Strike").get<int>();
-                    opt = new QuantoExchange(maturity, strike, domesticRate);
+                    opt = new QuantoExchange(maturity, strike, domesticRate, numberOfDaysPerYear);
                 }
             }
         }
@@ -118,8 +118,8 @@ int main(int argc, char **argv) {
     int nbSample;
     jsonParams.at("SampleNb").get_to(nbSample);
 
-    Portfolio *portfolio = new Portfolio(assetNb);
-    BlackScholesModel *bs = new BlackScholesModel(importantDates, assets, currencies);
+    Portfolio *portfolio = new Portfolio(assetNb+currNb-1);
+    BlackScholesModel *bs = new BlackScholesModel(importantDates, assets, currencies, numberOfDaysPerYear);
 
 
     //random Initialisation

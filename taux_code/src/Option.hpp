@@ -8,7 +8,8 @@ class Option
 {
   public:
     double T_;        /// maturité
-    double domesticRate_;   
+    double domesticRate_; 
+    int year_;  
     /**
      * Calcule la valeur du payoff sur la trajectoire
      *

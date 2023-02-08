@@ -1,9 +1,10 @@
 #include "BlackScholesModel.hpp"
 
-BlackScholesModel::BlackScholesModel(PnlVect* importantDates, vector<RiskyAsset*> assets, vector<Currency*> currencies){
+BlackScholesModel::BlackScholesModel(PnlVect* importantDates, vector<RiskyAsset*> assets, vector<Currency*> currencies, int year){
     assets_ = assets;
     currencies_ = currencies;
     importantDates_ = importantDates;
+    year_ = year;
 }
 
 void BlackScholesModel::asset(PnlMat* path, const PnlMat *past, double t, PnlRng* rng){
@@ -29,37 +30,37 @@ void BlackScholesModel::asset(PnlMat* path, const PnlMat *past, double t, PnlRng
         PnlMat *extract = pnl_mat_create_from_zero(past->m-1, past->n);
         pnl_mat_extract_subblock(extract, past, 0, past->m-1, 0, past->n);
         pnl_mat_set_subblock(path, extract, 0, 0);
+        pnl_mat_free(&extract);
     }
 
     ///variables globales
     double dt;
 
     ///iteration sur le nombre de dates importantes de l'option
-    std::cout << importantDates_->size << std::endl;
     for (int i = index; i < importantDates_->size; i++){
         ///remplissage du vecteur G
 
-        std::cout << "ligne :" << i << std::endl;
         pnl_vect_rng_normal(G, path->n, rng);
 
         if (i == 0){
-            dt = pnl_vect_get(importantDates_, index) - t;
+            dt = (pnl_vect_get(importantDates_, index) - t)/this->year_;
             ///remplissage pour les Stildes
             for (int j = 0; j < assets_.size(); j++){
                 double st = pnl_mat_get(past, past->m-1, j);
+                std::cout << exp(assets_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G)) << std::endl;
                 st *= exp(assets_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G));
                 pnl_mat_set(path, i, j, st);
             }
             /// remplissage pour les Xi
             for (int j = assets_.size(); j < assets_.size() + currencies_.size(); j++){
-                double st = pnl_mat_get(past, i-1, j);
-                st *= exp(currencies_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(currencies_[j]->sigma_, G));
+                double st = pnl_mat_get(past, past->m-1, j);
+                st *= exp(currencies_[j-assets_.size()]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(currencies_[j-assets_.size()]->sigma_, G));
                 pnl_mat_set(path, i, j, st);
             }
 
         }
         else{
-            dt = pnl_vect_get(importantDates_, index) - pnl_vect_get(importantDates_, index-1);
+            dt = (pnl_vect_get(importantDates_, index) - pnl_vect_get(importantDates_, index-1))/this->year_;
             ///remplissage pour les Stildes
             for (int j = 0; j < assets_.size(); j++){
                 double st = pnl_mat_get(path, i-1, j);
@@ -76,6 +77,7 @@ void BlackScholesModel::asset(PnlMat* path, const PnlMat *past, double t, PnlRng
 
         
     }
+    pnl_vect_free(&G);
 }
 
 void BlackScholesModel::shiftAsset(PnlMat* path, const PnlMat* past, double epsilon, double t, int column){

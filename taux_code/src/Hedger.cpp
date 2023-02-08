@@ -13,7 +13,9 @@ Hedger::Hedger(Portfolio *portfolio, string csvDocName, MonteCarlo *mc, Rebalanc
 void Hedger::RebalanceAll(){
     PnlMat * past = ExtractMarketData(0);
     RebalanceOnce(0, past);
+    pnl_mat_free(&past);
     for(int jour = 1; jour < this->mc_->opt_->T_; jour++){
+        std::cout << " " << std::endl;
         if (rebalancingTool_->IsRebalanceDate(jour)){
             PnlMat * past = ExtractMarketData(jour);
             RebalanceOnce(jour, past);
@@ -27,16 +29,18 @@ void Hedger::RebalanceOnce(int date, PnlMat* marketData){
 
     double prix = 0;
     double std_dev = 0;
-    PnlVect *deltas = pnl_vect_create(this->marketData_->n);
-    PnlVect *stdDeltas = pnl_vect_create(this->marketData_->n);
+    PnlVect *deltas = pnl_vect_create(this->portfolio_->quantity->size);
+    PnlVect *stdDeltas = pnl_vect_create(deltas->size);
     this->mc_->priceAndDeltas(marketData, date,prix, std_dev, deltas, stdDeltas, 0.1);
-
+    std::cout << "---------------" << std::endl;
     std::cout << "date :" << date << std::endl;
     std::cout << "prix :" << prix << std::endl;
     std::cout << "deltas :" << std::endl;
     pnl_vect_print(deltas);
     this->portfolio_->ChangeAllQuantities(marketData, deltas, date);
-    std::cout << "valeur portefeuille :" << this->portfolio_->value << std::endl;        
+    std::cout << "valeur portefeuille :" << this->portfolio_->value << std::endl;   
+    pnl_vect_free(&deltas);
+    pnl_vect_free(&stdDeltas);     
 }
 
 PnlMat *Hedger::ExtractMarketData(int date){
@@ -68,6 +72,8 @@ PnlMat *Hedger::ExtractMarketData(int date){
 
     pnl_mat_get_row(row, this->marketData_, date);
     pnl_mat_set_row(past, row, nbDates - 1);
+
+    pnl_vect_free(&row);
     
     return past;
 }

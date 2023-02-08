@@ -19,8 +19,9 @@ class BlackScholesModel
     vector<RiskyAsset*> assets_;
     vector<Currency*> currencies_;
     PnlVect* importantDates_;
+    int year_;
 
-    BlackScholesModel(PnlVect* importantDates, vector<RiskyAsset*> assets, vector<Currency*> currencies);
+    BlackScholesModel(PnlVect* importantDates, vector<RiskyAsset*> assets, vector<Currency*> currencies, int year);
 
     /**
      * Génère une trajectoire du modèle et la stocke dans path
