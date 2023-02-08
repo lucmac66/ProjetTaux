@@ -1,4 +1,5 @@
 #include "Currency.hpp"
+#include <iostream>
 
 Currency::Currency(double domesticRate, double foreignRate, PnlVect *sigma){
     this->domesticRate_ = domesticRate;

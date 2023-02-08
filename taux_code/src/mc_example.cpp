@@ -9,6 +9,9 @@
 #include "Currency.hpp"
 #include "RiskyAsset.hpp"
 #include "CallCurrency.hpp"
+#include "CallQuanto.hpp"
+#include "ForeignAsian.hpp"
+#include "ForeignPerfBasket.hpp"
 #include <map>
 #include "pnl/pnl_vector.h"
 #include "pnl/pnl_matrix.h"
@@ -18,61 +21,93 @@ int main(int argc, char **argv) {
     //      std::cerr << "Wrong number of arguments. Exactly one argument is required" << std::endl;
     //      std::exit(0);
     // }
-    std::cout << argv[1] << std::endl;
+
     std::ifstream ifs(argv[1]);
     nlohmann::json jsonParams = nlohmann::json::parse(ifs);
-    std::cout << argv[1] << std::endl;
 
     int assetNb = jsonParams.at("Assets").size();
     int currNb = jsonParams.at("Currencies").size();
-    PnlMat *correlation = pnl_mat_create_from_zero(assetNb + currNb - 1, assetNb + currNb - 1);
+    PnlMat *correlation;
     
-    // jsonParams.at("Correlations").get_to(correlation);
+    jsonParams.at("Correlations").get_to(correlation);
+    pnl_mat_chol(correlation);
 
-    map<string,Currency*> currencies;
+    map<string, int> mapping;
+    vector<Currency*> currencies;
     std::cout << "-- currencies" << std::endl;
 
     std::string domesticCurrencyId;
     jsonParams.at("DomesticCurrencyId").get_to(domesticCurrencyId);
     double domesticRate = 0;
 
-    PnlVect* sigmaat = pnl_vect_create_from_zero(1);
-    pnl_vect_print(sigmaat);
+    int market = 0;
+    PnlVect* sigma = pnl_vect_create_from_zero(correlation->m);
+
     auto jsonCurrencies = jsonParams.at("Currencies");
     for (auto jsonCurrency : jsonCurrencies) {
-        std::string currencyId = jsonCurrency.at("id").get<std::string>();
+        string currencyId = jsonCurrency.at("id").get<std::string>();
         if (currencyId == domesticCurrencyId){
             domesticRate = jsonCurrency.at("InterestRate").get<double>();
+            double foreignRate = jsonCurrency.at("InterestRate").get<double>();
+            currencies.push_back(new Currency(domesticRate, foreignRate, pnl_vect_create_from_zero(correlation->m)));
+            mapping[currencyId] = market;
+            market++;
         }
         else{
             double foreignRate = jsonCurrency.at("InterestRate").get<double>();
-            Currency *currency = new Currency(domesticRate, foreignRate, sigmaat);
-            // currencies.insert(std::make_pair(currencyId, Currency);
+            pnl_mat_get_col(sigma, correlation, market + assetNb - 1);
+            currencies.push_back(new Currency(domesticRate, foreignRate, sigma));
+            if (mapping.find(currencyId) == mapping.end()){
+                mapping[currencyId] = market;
+                market++;
+            }
         }
     }
     
     std::cout << "Number of assets " << assetNb << std::endl;
-
     
     vector<RiskyAsset*> assets;
     std::cout << "-- assets" << std::endl;
+    int col = 0;
     auto jsonAssets = jsonParams.at("Assets");
     for (auto jsonAsset : jsonAssets) {
         string id = jsonAsset.at("CurrencyId").get<std::string>();
-        Currency *curr = currencies[id];
-        // RiskyAsset *asset = new RiskyAsset(curr, sigmaat); 
-        // assets.push_back(asset);
+        pnl_mat_get_col(sigma, correlation, col);
+        assets.push_back(new RiskyAsset(currencies[mapping[id]], sigma));
+
     }
+
+    currencies.erase(currencies.begin());
+
 
     int numberOfDaysPerYear = jsonParams.at("NumberOfDaysInOneYear").get<int>();
     double maturity = jsonParams.at("Option").at("MaturityInDays").get<int>() / double (numberOfDaysPerYear);
     std::string label = jsonParams.at("Option").at("Type").get<std::string>();
-
+    Option *opt;
     if(label == "call_currency"){
         double strike = jsonParams.at("Option").at("Strike").get<int>();
-        // CallCurrency *opt = new CallCurrency(maturity, strike, domesticRate, currencies.first)
-    }
+        opt = new CallCurrency(maturity, strike, domesticRate, currencies[0]->foreignRate_);
+    }else{
+        if(label == "call_quanto"){
+            double strike = jsonParams.at("Option").at("Strike").get<int>();
+            opt = new CallQuanto(maturity, strike, domesticRate);
+        }
+        else{
+            if(label == "foreign_asian"){
+                opt = new ForeignAsian(maturity, domesticRate);
+            }
+            else{
+                if(label == "quanto_exchange"){
+                    double strike = jsonParams.at("Option").at("Strike").get<int>();
+                    opt = new QuantoExchange(maturity, strike, domesticRate);
+                }
+                else{
 
+                }
+            }
+        }
+    }
+    std::cout << "Ok" << std::endl;
     // PnlVect * importantDates;
 
 
