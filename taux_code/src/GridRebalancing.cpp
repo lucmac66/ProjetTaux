@@ -1,7 +1,7 @@
 #include "GridRebalancing.hpp"
 
-GridRebalancing::GridRebalancing(int startDate, PnlVect * dates){
-    this->lastRebalance = startDate;
+GridRebalancing::GridRebalancing(PnlVect * dates){
+    this->lastRebalance = 0;
     this->dates = dates;
 }
 

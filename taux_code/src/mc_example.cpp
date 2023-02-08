@@ -12,6 +12,9 @@
 #include "CallQuanto.hpp"
 #include "ForeignAsian.hpp"
 #include "ForeignPerfBasket.hpp"
+#include "Rebalancing.hpp"
+#include "FixedRebalancing.hpp"
+#include "GridRebalancing.hpp"
 #include <map>
 #include "pnl/pnl_vector.h"
 #include "pnl/pnl_matrix.h"
@@ -63,9 +66,7 @@ int main(int argc, char **argv) {
             }
         }
     }
-    
-    std::cout << "Number of assets " << assetNb << std::endl;
-    
+        
     vector<RiskyAsset*> assets;
     std::cout << "-- assets" << std::endl;
     int col = 0;
@@ -102,35 +103,46 @@ int main(int argc, char **argv) {
                     opt = new QuantoExchange(maturity, strike, domesticRate);
                 }
                 else{
-
+                    double strike = jsonParams.at("Option").at("Strike").get<int>();
+                    opt = new QuantoExchange(maturity, strike, domesticRate);
                 }
             }
         }
     }
-    std::cout << "Ok" << std::endl;
-    // PnlVect * importantDates;
 
-
-    // int nbSample;
-    // jsonParams.at("SampleNb").get_to(nbSample);
-
-    // Portfolio portfolio = new Portfolio(assetNb);
-    // BlackScholesModel *bs = new BlackScholesModel();
-
-
-    // //random Initialisation
-    // PnlRng *rng = pnl_rng_create(PNL_RNG_MERSENNE);
-    // pnl_rng_sseed(rng, (unsigned long)time(NULL));
-
-
-    // MonteCarlo *mc = new MonteCarlo(bs, opt, rng,nbSample);
-    
+    PnlVect * importantDates;
+    jsonParams.at("Option").at("FixingDatesInDays").at("DatesInDays").get_to(importantDates);
 
 
 
-    // Hedger hedger = new Hedger(portfolio, argv[2], mc);
-    // hedger.RebalanceAll();
+    int nbSample;
+    jsonParams.at("SampleNb").get_to(nbSample);
 
-    // pnl_mat_free(&correlation);
+    Portfolio *portfolio = new Portfolio(assetNb);
+    BlackScholesModel *bs = new BlackScholesModel(importantDates, assets, currencies);
+
+
+    //random Initialisation
+    PnlRng *rng = pnl_rng_create(PNL_RNG_MERSENNE);
+    pnl_rng_sseed(rng, (unsigned long)time(NULL));
+
+    std::cout << nbSample << std::endl;
+    MonteCarlo *mc = new MonteCarlo(bs, opt, rng, nbSample);
+
+    string type = jsonParams.at("PortfolioRebalancingOracleDescription").at("Type").get<std::string>();
+    Rebalancing *rebalancing;
+    if(type == "Fixed"){
+        rebalancing = new FixedRebalancing(jsonParams.at("PortfolioRebalancingOracleDescription").at("Period").get<int>());
+    }
+    else{
+        PnlVect * dates;
+        jsonParams.at("PortfolioRebalancingOracleDescription").at("DatesInDays").get_to(dates);
+        rebalancing = new GridRebalancing(dates);
+    }
+
+    Hedger *hedger = new Hedger(portfolio, argv[2], mc, rebalancing);
+    hedger->RebalanceAll();
+
+    pnl_mat_free(&correlation);
     std::exit(0);
 }

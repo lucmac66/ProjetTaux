@@ -12,5 +12,5 @@ class Portfolio
         int lastRebalance;
         
         Portfolio(int n);
-        void ChangeAllQuantities(const PnlVect *values, const PnlVect *deltas, int t);
+        void ChangeAllQuantities(const PnlMat *values, const PnlVect *deltas, int t);
 };

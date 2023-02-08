@@ -1,7 +1,7 @@
 #include "FixedRebalancing.hpp"
 
-FixedRebalancing::FixedRebalancing(int startDate, int period){
-    this->lastRebalance = startDate;
+FixedRebalancing::FixedRebalancing(int period){
+    this->lastRebalance = 0;
     this->period = period;
 }
 

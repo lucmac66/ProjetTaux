@@ -3,6 +3,7 @@
 #include "Option.hpp"
 #include "BlackScholesModel.hpp"
 #include "pnl/pnl_random.h"
+#include "math.h"
 
 class MonteCarlo
 {
@@ -14,5 +15,5 @@ class MonteCarlo
 
     MonteCarlo(BlackScholesModel* mod, Option* opt, PnlRng* rng, long nbSamples);
 
-    void priceAndDeltas(const PnlMat* past, double t, double& prix, double& std_dev, PnlVect *deltas, PnlVect *stdDeltas, int nbTimeSteps, double epsilon);
+    void priceAndDeltas(const PnlMat* past, double t, double& prix, double& std_dev, PnlVect *deltas, PnlVect *stdDeltas, double epsilon);
 };

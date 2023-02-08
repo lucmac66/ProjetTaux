@@ -6,7 +6,7 @@ class FixedRebalancing : public Rebalancing
 {
     public:
         int period;
-        FixedRebalancing(int startDate, int period);
+        FixedRebalancing(int period);
         bool IsRebalanceDate(int dateT) override;
 
 };

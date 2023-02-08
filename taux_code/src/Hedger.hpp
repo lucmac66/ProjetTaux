@@ -4,15 +4,19 @@
 #include "pnl/pnl_random.h"
 #include "Portfolio.hpp"
 #include "MonteCarlo.hpp"
+#include "Rebalancing.hpp"
 
 class Hedger
 {
     public:
-        Portfolio portfolio;
-        PnlMat * marketData;
-        MonteCarlo *mc;
+        Portfolio* portfolio_;
+        PnlMat * marketData_;
+        MonteCarlo *mc_;
+        Rebalancing *rebalancingTool_;
         
-        Hedger(Portfolio portfolio , string csvFileName, MonteCarlo *mc);
+        Hedger(Portfolio *portfolio , string csvFileName, MonteCarlo *mc, Rebalancing *rebalancingTool);
         void RebalanceAll();
         void RebalanceOnce(int date, PnlMat *marketData);
+        PnlMat *ExtractMarketData(int date);
+        PnlMat *ExtractCsv(string name);
 };

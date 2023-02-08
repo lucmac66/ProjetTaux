@@ -5,28 +5,33 @@ MonteCarlo::MonteCarlo(BlackScholesModel* mod, Option* opt, PnlRng* rng, long nb
     mod_ = mod;
     opt_ = opt;
     rng_ = rng;
-    nbSamples_ = nbSamples_;
+    nbSamples_ = nbSamples;
 }
 
 
 void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, double& std_dev, PnlVect *deltas, PnlVect *stdDeltas, double epsilon){
     ///création de la matrice path
-    PnlMat* path = pnl_mat_create(opt_->importantDates_->size, past->n);
-    PnlMat* pathEpsilonP = pnl_mat_create(opt_->importantDates_->size, past->n_);
-    PnlMat* pathEpsilonN = pnl_mat_create(opt_->importantDates_->size, past->n_);
+    PnlMat* path = pnl_mat_create(this->mod_->importantDates_->size, past->n);
+
+    PnlMat* pathEpsilonP = pnl_mat_create(this->mod_->importantDates_->size, past->n);
+    PnlMat* pathEpsilonN = pnl_mat_create(this->mod_->importantDates_->size, past->n);
 
     ///initialisation price et std dev
+
+
     prix = 0;
     std_dev = 0;
     double payoff;
     double deltapayoff;
     ///tirages Monte Carlo
     for (int i = 0; i < nbSamples_; i++){
+        pnl_mat_print(path);
         mod_->asset(path, past, t,  rng_);
+        pnl_mat_print(path);
         payoff = opt_->payoff(path, t);
         prix += payoff;
         std_dev += payoff * payoff;
-        for (int j = 0; j < n + opt_->n_; j++){
+        for (int j = 0; j < path->n; j++){
             pathEpsilonN = pnl_mat_copy(path);
             pathEpsilonP = pnl_mat_copy(path);
             mod_->shiftAsset(pathEpsilonP, past, epsilon, t, j);
@@ -38,7 +43,7 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
         }
 
     }
-    for (int j = 0; j < n + opt_->n_; j++){
+    for (int j = 0; j < path->n; j++){
         pnl_vect_set(deltas, j, pnl_vect_get(deltas, j)/ (2*epsilon*nbSamples_));
         pnl_vect_set(stdDeltas, j, sqrt(abs(pnl_vect_get(stdDeltas, j)/ (2*epsilon*nbSamples_) - pnl_vect_get(deltas, j)*pnl_vect_get(deltas, j))));
     }

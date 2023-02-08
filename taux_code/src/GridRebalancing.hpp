@@ -7,7 +7,7 @@ class GridRebalancing : public Rebalancing
     public:
         PnlVect* dates;
 
-        GridRebalancing(int startDate, PnlVect *dates);
+        GridRebalancing(PnlVect *dates);
         bool IsRebalanceDate(int dateT);
 
 };

@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "math.h"
 
 using namespace std;
 
@@ -15,11 +16,11 @@ using namespace std;
 class BlackScholesModel
 {
   public:
-    vector<RiskyAsset> assets_;
-    vector<Currency> currencies_;
+    vector<RiskyAsset*> assets_;
+    vector<Currency*> currencies_;
     PnlVect* importantDates_;
 
-    BlackScholesModel(PnlVect* importantDates, vector<RiskyAsset> assets, vector<Currency> currencies);
+    BlackScholesModel(PnlVect* importantDates, vector<RiskyAsset*> assets, vector<Currency*> currencies);
 
     /**
      * Génère une trajectoire du modèle et la stocke dans path
@@ -30,9 +31,9 @@ class BlackScholesModel
      * @param[in] nbTimeSteps nombre de dates de constatation
      */
 
-    void asset(PnlMat* path, PnlMat *past, double t, PnlRng* rng);
+    void asset(PnlMat* path, const PnlMat *past, double t, PnlRng* rng);
 
-    void shiftAsset(PnlMat* path, PnlMat* past, double epsilon, double t, int column);
+    void shiftAsset(PnlMat* path, const PnlMat* past, double epsilon, double t, int column);
 
     /**
      * Calcule une trajectoire du modèle connaissant le
