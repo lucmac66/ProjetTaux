@@ -1,0 +1,41 @@
+{
+  "Currencies": [
+    {
+      "id": "eur",
+      "InterestRate": 0.01,
+      "Volatility": 0
+    },
+    {
+      "id": "us_dollar",
+      "InterestRate": 0.015,
+      "Volatility": 0.18
+    }
+  ],
+  "DomesticCurrencyId": "eur",
+  "Assets": [
+    {
+      "CurrencyId": "us_dollar",
+      "Volatility": 0.3
+    }
+  ],
+  "NumberOfDaysInOneYear": 252,
+  "PortfolioRebalancingOracleDescription": {
+    "Type": "Fixed",
+    "Period": 1
+  },
+  "Option": {
+    "Type": "call_quanto",
+    "FixingDatesInDays": {
+      "Type": "Grid",
+      "DatesInDays": [ 378 ]
+    },
+    "Strike": 10,
+    "MaturityInDays": 378
+  },
+  "Correlations": [
+    [ 1, 0.2],
+    [ 0.1, 1]
+  ],
+  "SampleNb": 50000,
+  "RelativeFiniteDifferenceStep": 0.1
+}

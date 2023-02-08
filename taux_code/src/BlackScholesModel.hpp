@@ -15,15 +15,11 @@ using namespace std;
 class BlackScholesModel
 {
   public:
-    int n_; /// nombre de marchés étrangers
     vector<RiskyAsset> assets_;
     vector<Currency> currencies_;
-    PnlVect* size_;  /// nombre d'actifs de chacun des marchés (dans l'ordre : dom, etrangers)
-    PnlVect* r_;     /// taux d'intérêt de chacun des marchés
-    PnlMat* sigma_; /// matrice de correlation
-    PnlVect* spot_;  /// valeurs initiales des sous-jacents
+    PnlVect* importantDates_;
 
-    BlackScholesModel(int n, PnlVect* size, PnlVect* r, PnlMat* sigma, PnlVect* spot, std::vector<RiskyAsset> assets, std::vector<Currency> currencies);
+    BlackScholesModel(PnlVect* importantDates, vector<RiskyAsset> assets, vector<Currency> currencies);
 
     /**
      * Génère une trajectoire du modèle et la stocke dans path
@@ -34,13 +30,7 @@ class BlackScholesModel
      * @param[in] nbTimeSteps nombre de dates de constatation
      */
 
-    void asset(PnlMat* path, double T, int nbTimeSteps, PnlRng* rng);
-
-    void simulDomestic(PnlMat* path, int i, int j, PnlVect* G, double dt);
-    void simulForeign(PnlMat* path, int i, int j, PnlVect* G, double dt, int k, int n);
-    void simulRate(PnlMat* path, int i, int j, PnlVect* G, double dt, int l);
-
-    void asset(PnlMat* path, double t, double T, int nbTimeSteps, PnlRng* rng, PnlMat* past);
+    void asset(PnlMat* path, PnlMat *past, double t, PnlRng* rng);
 
     void shiftAsset(PnlMat* path, PnlMat* past, double epsilon, double t, int column);
 
@@ -56,21 +46,4 @@ class BlackScholesModel
      * @param[in] T date jusqu'à laquelle on simule la trajectoire
      * @param[in] past trajectoire réalisée jusqu'a la date t
      */
-    void asset(PnlMat* path, double t, double T, int nbTimeSteps, PnlRng* rng, const PnlMat* past);
-
-    /**
-     * Shift d'une trajectoire du sous-jacent
-     *
-     * @param[in]  path contient en input la trajectoire
-     * du sous-jacent
-     * @param[out] shift_path contient la trajectoire path
-     * dont la composante d a été shiftée par (1+h)
-     * à partir de la date t.
-     * @param[in] t date à partir de laquelle on shift
-     * @param[in] h pas de différences finies
-     * @param[in] d indice du sous-jacent à shifter
-     * @param[in] timestep pas de constatation du sous-jacent
-     */
-    void shiftAsset(PnlMat* path, PnlMat* past, double T, int nbTimeSteps, double epsilon, double t, int column);
-
 };

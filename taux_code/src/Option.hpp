@@ -8,9 +8,7 @@ class Option
 {
   public:
     double T_;        /// maturité
-    PnlVect* size_;  /// nombre d'actifs de chacun des marchés (dans l'ordre : dom, etrangers)
-    int n_; /// nombre de marchés étrangers
-    double domesticRate_;        /// dimension du modèle, redondant avec BlackScholesModel::size_
+    double domesticRate_;   
     /**
      * Calcule la valeur du payoff sur la trajectoire
      *

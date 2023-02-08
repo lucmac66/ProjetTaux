@@ -9,12 +9,11 @@ MonteCarlo::MonteCarlo(BlackScholesModel* mod, Option* opt, PnlRng* rng, long nb
 }
 
 
-void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, double& std_dev, PnlVect *deltas, PnlVect *stdDeltas, int nbTimeSteps, double epsilon){
+void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, double& std_dev, PnlVect *deltas, PnlVect *stdDeltas, double epsilon){
     ///création de la matrice path
-    int n = (int) pnl_vect_sum(opt_->size_);
-    PnlMat* path = pnl_mat_create(nbTimeSteps, n + opt_->n_);
-    PnlMat* pathEpsilonP = pnl_mat_create(nbTimeSteps, n + opt_->n_);
-    PnlMat* pathEpsilonN = pnl_mat_create(nbTimeSteps, n + opt_->n_);
+    PnlMat* path = pnl_mat_create(opt_->importantDates_->size, past->n);
+    PnlMat* pathEpsilonP = pnl_mat_create(opt_->importantDates_->size, past->n_);
+    PnlMat* pathEpsilonN = pnl_mat_create(opt_->importantDates_->size, past->n_);
 
     ///initialisation price et std dev
     prix = 0;
@@ -23,15 +22,15 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
     double deltapayoff;
     ///tirages Monte Carlo
     for (int i = 0; i < nbSamples_; i++){
-        mod_->asset(path, t, this->opt_->T_, nbTimeSteps, rng_, past);
+        mod_->asset(path, past, t,  rng_);
         payoff = opt_->payoff(path, t);
         prix += payoff;
         std_dev += payoff * payoff;
         for (int j = 0; j < n + opt_->n_; j++){
             pathEpsilonN = pnl_mat_copy(path);
             pathEpsilonP = pnl_mat_copy(path);
-            mod_->shiftAsset(pathEpsilonP, past, this->opt_->T_, nbTimeSteps, epsilon, t, j);
-            mod_->shiftAsset(pathEpsilonN, past, this->opt_->T_, nbTimeSteps, -epsilon, t, j);
+            mod_->shiftAsset(pathEpsilonP, past, epsilon, t, j);
+            mod_->shiftAsset(pathEpsilonN, past, -epsilon, t, j);
 
             deltapayoff = opt_->payoff(pathEpsilonP, t) - opt_->payoff(pathEpsilonN, t);
             pnl_vect_set(deltas, j, pnl_vect_get(deltas, j) + deltapayoff);

@@ -1,8 +1,7 @@
 #include "QuantoExchange.hpp"
 
-QuantoExchange::QuantoExchange(double T, int size, double strike, double domestricRate){
+QuantoExchange::QuantoExchange(double T, double strike, double domestricRate){
     this->T_ = T;
-    this->size_ = size;
     this->strike_ = strike;
     this->domesticRate_ = domestricRate;
 }

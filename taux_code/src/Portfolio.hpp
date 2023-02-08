@@ -7,10 +7,10 @@ class Portfolio
 {
     public:
         double freeRiskQuantity;
-        PnlMat *quantity;
+        PnlVect *quantity;
         double value;
         int lastRebalance;
         
-        Portfolio(int n , int maxN);
-        void ChangeAllQuantities(const PnlMat *values, const PnlMat *deltas, int t);
+        Portfolio(int n);
+        void ChangeAllQuantities(const PnlVect *values, const PnlVect *deltas, int t);
 };

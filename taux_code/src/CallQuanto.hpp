@@ -5,6 +5,6 @@ class CallQuanto: public Option{
     public :
     double strike_;
 
-    CallQuanto(double T, int size, double strike, double domesticRate);
+    CallQuanto(double T, double strike, double domesticRate);
     double payoff(const PnlMat *path, double t);
 };

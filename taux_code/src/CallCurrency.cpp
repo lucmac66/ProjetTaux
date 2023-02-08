@@ -1,8 +1,7 @@
 #include "CallCurrency.hpp"
 
-CallCurrency::CallCurrency(double T, int size, double strike, double domestricRate, double foreignRate){
+CallCurrency::CallCurrency(double T, double strike, double domestricRate, double foreignRate){
     this->T_ = T;
-    this->size_ = size;
     this->strike_ = strike;
     this->domesticRate_ = domestricRate;
     this->foreignRate_ = foreignRate;

@@ -3,8 +3,7 @@
 
 class ForeignAsian: public Option{
     public :
-    int nbDates_;
 
-    ForeignAsian(double T, int size, double domesticRate, int nbDates);
+    ForeignAsian(double T, double domesticRate);
     double payoff(const PnlMat *path, double t);
 };

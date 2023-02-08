@@ -6,7 +6,7 @@ class Currency{
     double domesticRate_;
     double foreignRate_;
     double drift_;
-    PnlVect *sigma_;
-    Currency(double domesticRate, double foreignRate, PnlVect *sigma);
+    PnlVect* sigma_;
+    Currency(double domesticRate, double foreignRate, PnlVect* sigma);
 };
 

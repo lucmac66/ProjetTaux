@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nlohmann/json.hpp>
+#include "nlohmann/json.hpp"
 #include "pnl/pnl_vector.h"
 #include "pnl/pnl_matrix.h"
 

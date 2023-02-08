@@ -38,8 +38,8 @@ add_subdirectory(src/jlparser)
 # Add nlohmann_json::nlohmann_json to target_link_libraries
 find_package(nlohmann_json REQUIRED)
 
-set(fxhedging_hdrs  json_reader.hpp)
-add_library(fx_hedging json_reader.cpp ${fxhedging_hdrs})
+set(fxhedging_hdrs  src/json_reader.hpp)
+add_library(fx_hedging src/json_reader.cpp ${fxhedging_hdrs})
 target_link_libraries(fx_hedging ${PNL_LIBRARIES} nlohmann_json::nlohmann_json)
 
 
