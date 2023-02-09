@@ -32,14 +32,12 @@ void BlackScholesModel::asset(PnlMat* path, const PnlMat *past, double t, PnlRng
         pnl_mat_set_subblock(path, extract, 0, 0);
         pnl_mat_free(&extract);
     }
-
     ///variables globales
     double dt;
 
     ///iteration sur le nombre de dates importantes de l'option
     for (int i = index; i < importantDates_->size; i++){
         ///remplissage du vecteur G
-
         pnl_vect_rng_normal(G, path->n, rng);
 
         if (i == 0){
@@ -47,14 +45,6 @@ void BlackScholesModel::asset(PnlMat* path, const PnlMat *past, double t, PnlRng
             ///remplissage pour les Stildes
             for (int j = 0; j < assets_.size(); j++){
                 double st = pnl_mat_get(past, past->m-1, j);
-                // std::cout << " drift : " << assets_[j]->drift_ <<std::endl;
-                // std::cout << " G : " << std::endl;
-                // pnl_vect_print(G);
-                // std::cout << " Sigma : " << std::endl;
-                // pnl_vect_print(assets_[j] -> sigma_);
-                // std::cout << " dt : " << dt <<std::endl;
-                // std::cout << "argument :" << assets_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G) << std::endl;
-                // std::cout << "exp :" << exp(assets_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G)) << std::endl;
                 st *= exp(assets_[j]->drift_ * dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G));
                 pnl_mat_set(path, i, j, st);
             }
@@ -67,17 +57,18 @@ void BlackScholesModel::asset(PnlMat* path, const PnlMat *past, double t, PnlRng
 
         }
         else{
-            dt = (pnl_vect_get(importantDates_, index) - pnl_vect_get(importantDates_, index-1))/this->year_;
+            dt = (pnl_vect_get(importantDates_, i) - pnl_vect_get(importantDates_, i-1))/this->year_;
             ///remplissage pour les Stildes
+
             for (int j = 0; j < assets_.size(); j++){
-                double st = pnl_mat_get(path, i-1, j);
-                st *= exp(assets_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G));
+                double st = pnl_mat_get(past, past->m-1, j);
+                st *= exp(assets_[j]->drift_ * dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G));
                 pnl_mat_set(path, i, j, st);
             }
             /// remplissage pour les Xi
             for (int j = assets_.size(); j < assets_.size() + currencies_.size(); j++){
-                double st = pnl_mat_get(path, i-1, j);
-                st *= exp(currencies_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(currencies_[j]->sigma_, G));
+                double st = pnl_mat_get(past, past->m-1, j);
+                st *= exp(currencies_[j-assets_.size()]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(currencies_[j-assets_.size()]->sigma_, G));
                 pnl_mat_set(path, i, j, st);
             }
         }

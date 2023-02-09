@@ -35,12 +35,9 @@ int main(int argc, char **argv) {
     jsonParams.at("Correlations").get_to(correlation);
     pnl_mat_chol(correlation);
 
-    pnl_mat_print(correlation);
-
     map<string, int> mapping;
     map<string, int> marketsize;
     vector<Currency*> currencies;
-    std::cout << "-- currencies" << std::endl;
 
     std::string domesticCurrencyId;
     jsonParams.at("DomesticCurrencyId").get_to(domesticCurrencyId);
@@ -75,7 +72,6 @@ int main(int argc, char **argv) {
     }
         
     vector<RiskyAsset*> assets;
-    std::cout << "-- assets" << std::endl;
     int col = 0;
     auto jsonAssets = jsonParams.at("Assets");
     for (auto jsonAsset : jsonAssets) {
@@ -102,36 +98,42 @@ int main(int argc, char **argv) {
     int maturity = jsonParams.at("Option").at("MaturityInDays").get<int>();
     std::string label = jsonParams.at("Option").at("Type").get<std::string>();
     Option *opt;
+    PnlVect * importantDates;
     if(label == "call_currency"){
         double strike = jsonParams.at("Option").at("Strike").get<int>();
+        jsonParams.at("Option").at("FixingDatesInDays").at("DatesInDays").get_to(importantDates);
         opt = new CallCurrency(maturity, strike, domesticRate, currencies[0]->foreignRate_, numberOfDaysPerYear, sizemarket);
     }else{
         if(label == "call_quanto"){
             double strike = jsonParams.at("Option").at("Strike").get<int>();
+            jsonParams.at("Option").at("FixingDatesInDays").at("DatesInDays").get_to(importantDates);
             opt = new CallQuanto(maturity, strike, domesticRate, numberOfDaysPerYear, sizemarket);
         }
         else{
             if(label == "foreign_asian"){
+                int periodOption = jsonParams.at("Option").at("FixingDatesInDays").at("Period").get<int>();
+                importantDates = pnl_vect_create_from_zero((int)(maturity/periodOption));
+                int comp = periodOption;
+                for(int i = 0; i < importantDates->size; i++){
+                    pnl_vect_set(importantDates, i, (int)(comp));
+                    comp += periodOption;
+                }
                 opt = new ForeignAsian(maturity, domesticRate, numberOfDaysPerYear, sizemarket);
             }
             else{
                 if(label == "quanto_exchange"){
                     double strike = jsonParams.at("Option").at("Strike").get<int>();
+                    jsonParams.at("Option").at("FixingDatesInDays").at("DatesInDays").get_to(importantDates);
                     opt = new QuantoExchange(maturity, strike, domesticRate, numberOfDaysPerYear, sizemarket);
                 }
                 else{
                     double strike = jsonParams.at("Option").at("Strike").get<int>();
-                    
+                    jsonParams.at("Option").at("FixingDatesInDays").at("DatesInDays").get_to(importantDates);
                     opt = new ForeignPerfBasket(maturity, strike, domesticRate, numberOfDaysPerYear, sizemarket);
                 }
             }
         }
     }
-
-    PnlVect * importantDates;
-    jsonParams.at("Option").at("FixingDatesInDays").at("DatesInDays").get_to(importantDates);
-
-
 
     int nbSample;
     jsonParams.at("SampleNb").get_to(nbSample);
@@ -139,12 +141,10 @@ int main(int argc, char **argv) {
     Portfolio *portfolio = new Portfolio(assetNb+currNb-1, numberOfDaysPerYear, domesticRate);
     BlackScholesModel *bs = new BlackScholesModel(importantDates, assets, currencies, numberOfDaysPerYear);
 
-
     //random Initialisation
     PnlRng *rng = pnl_rng_create(PNL_RNG_MERSENNE);
     pnl_rng_sseed(rng, time(NULL));
 
-    std::cout << nbSample << std::endl;
     MonteCarlo *mc = new MonteCarlo(bs, opt, rng, nbSample);
 
     string type = jsonParams.at("PortfolioRebalancingOracleDescription").at("Type").get<std::string>();
@@ -158,7 +158,17 @@ int main(int argc, char **argv) {
         rebalancing = new GridRebalancing(dates);
     }
 
-    Hedger *hedger = new Hedger(portfolio, argv[2], mc, rebalancing, sizemarket, argv[3]);
+    Hedger *hedger = new Hedger(portfolio, argv[2], mc, rebalancing, sizemarket);
+
+    
+
+    nlohmann::json jsonPortfolio = hedger->portfolio_->positions;
+    std::ofstream ifout(argv[3], std::ios_base::out);
+    if (!ifout.is_open()) {
+        std::cout << "Unable to open file " << argv[3] << std::endl;
+        std::exit(1);
+    }
+    ifout << jsonPortfolio.dump(4);
     hedger->RebalanceAll();
 
     pnl_mat_free(&correlation);

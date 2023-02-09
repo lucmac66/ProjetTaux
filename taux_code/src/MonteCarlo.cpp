@@ -14,7 +14,7 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
     PnlMat* path = pnl_mat_create(this->mod_->importantDates_->size, past->n);
     PnlMat* pathEpsilonP = pnl_mat_create(this->mod_->importantDates_->size, past->n);
     PnlMat* pathEpsilonN = pnl_mat_create(this->mod_->importantDates_->size, past->n);
-    
+
     ///initialisation price et std dev
 
     int nbAsset = std::accumulate(this->opt_->sizemarket_.begin(), this->opt_->sizemarket_.end(), 0);
@@ -22,12 +22,11 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
     std_dev = 0;
     double payoff;
     double deltapayoff;
+
     ///tirages Monte Carlo
     for (int i = 0; i < nbSamples_; i++){
         mod_->asset(path, past, t,  rng_);
         payoff = opt_->payoff(path, t);
-        // std::cout << i << " " << std::endl;
-        // pnl_mat_print(path);
         prix += payoff;
         std_dev += payoff * payoff;
         for (int j = 0; j < path->n; j++){
@@ -47,7 +46,6 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
         pnl_vect_set(deltas, j, pnl_vect_get(deltas, j)/ (2*epsilon*nbSamples_));
         pnl_vect_set(stdDeltas, j, sqrt(abs(pnl_vect_get(stdDeltas, j)/ (2*epsilon*nbSamples_) - pnl_vect_get(deltas, j)*pnl_vect_get(deltas, j))/ nbSamples_));
     }
-
     prix /= nbSamples_;
     std_dev = sqrt(abs(std_dev/nbSamples_ - prix*prix)/nbSamples_);
 

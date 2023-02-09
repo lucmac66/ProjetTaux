@@ -6,9 +6,11 @@
       "Volatility": 0
     },
     {
-      "id": "us_dollar",
+      "id": "yen",
       "InterestRate": 0.01,
-      "Volatility": 0.15
+      "Volatility": 0.15,
+      "Spot": 140,
+      "Drift": 0.05
     }
   ],
   "DomesticCurrencyId": "eur",
@@ -24,12 +26,22 @@
       "Type": "Grid",
       "DatesInDays": [ 126 ]
     },
-    "Strike": 10,
+    "Strike": 142,
     "MaturityInDays": 126
   },
   "Correlations": [
     [ 1]
   ],
-  "SampleNb": 50000,
-  "RelativeFiniteDifferenceStep": 0.1
+  "SampleNb": 100000,
+  "RelativeFiniteDifferenceStep": 0.01,
+  "benchmarkResults": {
+    "price": 5.7184654073244445,
+    "priceStdDev": 0.02868936167928242,
+    "deltas": [
+      0.508680310884232
+    ],
+    "deltaStdDev": [
+      0.0016927889040541189
+    ]
+  }
 }

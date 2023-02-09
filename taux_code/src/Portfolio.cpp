@@ -9,7 +9,6 @@ Portfolio::Portfolio(int n, int nbDays, double rate){
     this->rate_ = rate;
     this->nbDays_ = nbDays;
     this->lastRebalance = 0;
-
 }
 
 void Portfolio::ChangeAllQuantities(const PnlMat *values, const PnlVect * deltas, int t){
@@ -43,21 +42,4 @@ void Portfolio::ChangeAllQuantities(const PnlMat *values, const PnlVect * deltas
     this->lastRebalance = t;
 }
 
-Position::Position(int date, double price, double priceStdDev, PnlVect* deltas, PnlVect* deltasStdDev, double portfolioValue)
-    : date(date), price(price), priceStdDev(priceStdDev), portfolioValue(portfolioValue), deltas(deltas), deltasStdDev(deltasStdDev) {
 
-}
-
-void to_json(nlohmann::json &j, const Position &position) {
-    j["date"] = position.date;
-    j["value"] = position.portfolioValue;
-    j["price"] = position.price;
-    j["priceStdDev"] = position.priceStdDev;
-    j["deltas"] = position.deltas;
-    j["deltasStdDev"] = position.deltasStdDev;
-}
-
-void Position::print() const {
-    nlohmann::json j = *this;
-    std::cout << j.dump(4);
-}

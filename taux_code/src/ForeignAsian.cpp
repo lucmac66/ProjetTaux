@@ -12,7 +12,7 @@ double ForeignAsian::payoff(const PnlMat* path, double t){
     for (int i = 0; i < path->m; i++){
         payoff += pnl_mat_get(path, i, 1);
     }
-    payoff /= path->m;
+    payoff /= (path->m);
     payoff -= pnl_mat_get(path, path->m-1, 0);
     if (payoff > 0){
         return exp(this->domesticRate_ * (t - this->T_)/ this->year_) * payoff;

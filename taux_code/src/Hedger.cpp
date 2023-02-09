@@ -7,14 +7,11 @@
 
 using namespace std;
 
-Hedger::Hedger(Portfolio *portfolio, string csvDocName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize, string jsonDocName){
+Hedger::Hedger(Portfolio *portfolio, string csvDocName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize){
     this->portfolio_ = portfolio;
     this->marketData_ = ExtractCsv(csvDocName, marketsize);
     this->mc_ = mc;
     this->rebalancingTool_ = rebalancingTool;
-    std::ifstream ifs(jsonDocName);
-    this->json = nlohmann::json::parse(ifs);
-
 }
 
 void Hedger::RebalanceAll(){
@@ -45,40 +42,33 @@ void Hedger::RebalanceOnce(int date, PnlMat* marketData){
         this->portfolio_->ChangeAllQuantities(marketData, deltas, date);
     }
 
-    Position *position = new Position(date, prix, std_dev, deltas, stdDeltas, this->portfolio_->value);
-    to_json(this->json, position);
+    Position position(date, prix, std_dev, deltas, stdDeltas, this->portfolio_->value);
+    position.print();
+    this->portfolio_->positions.push_back(position);
     pnl_vect_free(&deltas);
     pnl_vect_free(&stdDeltas);     
 }
 
 PnlMat *Hedger::ExtractMarketData(int date){
-    int nbDates = 0;
+    int nbDates = 1;
     for(int i = 0; i < this->mc_->mod_->importantDates_->size; i++){
-        if (date > pnl_vect_get(this->mc_->mod_->importantDates_, i)){
+        int dateReference = pnl_vect_get(this->mc_->mod_->importantDates_, i);
+        if (date > dateReference){
             nbDates++;
         }
         else{
             break;
         }
     }
-
-    if(pnl_vect_get(this->mc_->mod_->importantDates_, nbDates) != date){
-        nbDates++;
-    }else{
-        if(pnl_vect_get(this->mc_->mod_->importantDates_, this->mc_->mod_->importantDates_->size-1) == date){
-            nbDates = 1;
-        }
-    }
-
     // Creation du market Data
-
     PnlMat * past = pnl_mat_create_from_zero(nbDates, this->marketData_->n);
     PnlVect * row = pnl_vect_create_from_zero(this->marketData_->n);
 
     // Extraction
 
-    for(int i = 0; i < nbDates - 1; i++){
-        pnl_mat_get_row(row, this->marketData_, pnl_vect_get(this->mc_->mod_->importantDates_, i));
+    for(int i = 0; i < nbDates-1; i++){
+        double date = pnl_vect_get(this->mc_->mod_->importantDates_, i);
+        pnl_mat_get_row(row, this->marketData_, date);
         pnl_mat_set_row(past, row, i);
     }
 
@@ -86,7 +76,6 @@ PnlMat *Hedger::ExtractMarketData(int date){
     pnl_mat_set_row(past, row, nbDates - 1);
 
     pnl_vect_free(&row);
-
     return past;
 
 }
@@ -139,5 +128,6 @@ PnlMat *Hedger::ExtractCsv(string name, vector<int> marketsize){
         }
         col += marketsize[i];
     }
+
     return marketData;
 }

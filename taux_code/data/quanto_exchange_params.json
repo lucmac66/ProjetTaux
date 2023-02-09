@@ -49,7 +49,7 @@
   ],
   "SampleNb": 50000,
   "RelativeFiniteDifferenceStep": 0.1,
-  "benchamarkResults": {
+  "benchmarkResults": {
     "price": 1.120155918353307,
     "priceStdDev": 0.00743648724802216,
     "deltas": [

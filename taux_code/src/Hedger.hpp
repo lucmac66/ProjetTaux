@@ -14,9 +14,8 @@ class Hedger
         PnlMat * marketData_;
         MonteCarlo *mc_;
         Rebalancing *rebalancingTool_;
-        nlohmann::json json;
         
-        Hedger(Portfolio *portfolio , string csvFileName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize, string jsonDocName);
+        Hedger(Portfolio *portfolio , string csvFileName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize);
         void RebalanceAll();
         void RebalanceOnce(int date, PnlMat *marketData);
         PnlMat *ExtractMarketData(int date);
