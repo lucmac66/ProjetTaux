@@ -5,6 +5,8 @@
 #include "Portfolio.hpp"
 #include "MonteCarlo.hpp"
 #include "Rebalancing.hpp"
+#include <list>
+#include "Position.hpp"
 
 using namespace std;
 class Hedger
@@ -14,10 +16,12 @@ class Hedger
         PnlMat * marketData_;
         MonteCarlo *mc_;
         Rebalancing *rebalancingTool_;
+        list<Position> positions;
+        double epsilon_;
         
-        Hedger(Portfolio *portfolio , string csvFileName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize);
+        Hedger(Portfolio *portfolio , char* csvFileName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize, double epsilon);
         void RebalanceAll();
         void RebalanceOnce(int date, PnlMat *marketData);
         PnlMat *ExtractMarketData(int date);
-        PnlMat *ExtractCsv(string name, vector<int> marketsize);
+        PnlMat *ExtractCsv(char* name, vector<int> marketsize);
 };

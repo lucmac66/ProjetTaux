@@ -6,5 +6,6 @@ Currency::Currency(string id, double domesticRate, double foreignRate, PnlVect *
     this->foreignRate_ = foreignRate;
     pnl_vect_mult_scalar(corr, sigma);
     this->sigma_ = corr;
-    this->drift_ = this->domesticRate_ - this->foreignRate_ - pnl_vect_norm_two(this->sigma_)/ 2;
+    double norm = pnl_vect_norm_two(this->sigma_);
+    this->drift_ = this->domesticRate_ - this->foreignRate_ - norm * norm/ 2;
 }

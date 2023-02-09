@@ -49,8 +49,8 @@ target_link_libraries(fx_hedging ${PNL_LIBRARIES} nlohmann_json::nlohmann_json)
 add_executable(parser-example src/parser_example.cpp)
 target_link_libraries(parser-example jl_parser ${LIBS} nlohmann_json::nlohmann_json)
 
-add_executable(mc-example src/mc_example.cpp src/FixedRebalancing.cpp src/GridRebalancing.cpp src/Portfolio.cpp src/CallQuanto.cpp src/Currency.cpp src/RiskyAsset.cpp src/CallCurrency.cpp src/QuantoExchange.cpp src/ForeignAsian.cpp src/json_reader.cpp src/MonteCarlo.cpp src/BlackScholesModel.cpp src/Hedger.cpp src/ForeignPerfBasket.cpp src/Position.cpp)
-target_link_libraries(mc-example jl_parser ${LIBS} nlohmann_json::nlohmann_json)
+add_executable(hedging_portfolio src/hedging_portfolio.cpp src/FixedRebalancing.cpp src/GridRebalancing.cpp src/Portfolio.cpp src/CallQuanto.cpp src/Currency.cpp src/RiskyAsset.cpp src/CallCurrency.cpp src/QuantoExchange.cpp src/ForeignAsian.cpp src/json_reader.cpp src/MonteCarlo.cpp src/BlackScholesModel.cpp src/Hedger.cpp src/ForeignPerfBasket.cpp src/Position.cpp)
+target_link_libraries(hedging_portfolio jl_parser ${LIBS} nlohmann_json::nlohmann_json)
 
 # Print compiler flags
 get_directory_property(DirDefs COMPILE_DEFINITIONS)

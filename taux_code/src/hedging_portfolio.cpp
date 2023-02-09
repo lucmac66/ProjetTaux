@@ -157,20 +157,20 @@ int main(int argc, char **argv) {
         jsonParams.at("PortfolioRebalancingOracleDescription").at("DatesInDays").get_to(dates);
         rebalancing = new GridRebalancing(dates);
     }
+    double epsilon = jsonParams.at("RelativeFiniteDifferenceStep").get<double>();
+    Hedger *hedger = new Hedger(portfolio, argv[2], mc, rebalancing, sizemarket, epsilon);
 
-    Hedger *hedger = new Hedger(portfolio, argv[2], mc, rebalancing, sizemarket);
-
+    hedger->RebalanceAll();
     
 
-    nlohmann::json jsonPortfolio = hedger->portfolio_->positions;
+    nlohmann::json jsonPortfolio = hedger->positions;
     std::ofstream ifout(argv[3], std::ios_base::out);
     if (!ifout.is_open()) {
         std::cout << "Unable to open file " << argv[3] << std::endl;
         std::exit(1);
     }
     ifout << jsonPortfolio.dump(4);
-    hedger->RebalanceAll();
-
+    
     pnl_mat_free(&correlation);
     std::exit(0);
 }

@@ -7,11 +7,12 @@
 
 using namespace std;
 
-Hedger::Hedger(Portfolio *portfolio, string csvDocName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize){
+Hedger::Hedger(Portfolio *portfolio, char* csvDocName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize, double epsilon){
     this->portfolio_ = portfolio;
     this->marketData_ = ExtractCsv(csvDocName, marketsize);
     this->mc_ = mc;
     this->rebalancingTool_ = rebalancingTool;
+    this->epsilon_ = epsilon;
 }
 
 void Hedger::RebalanceAll(){
@@ -33,7 +34,8 @@ void Hedger::RebalanceOnce(int date, PnlMat* marketData){
     double std_dev = 0;
     PnlVect *deltas = pnl_vect_create_from_zero(this->portfolio_->quantity->size);
     PnlVect *stdDeltas = pnl_vect_create_from_zero(deltas->size);
-    this->mc_->priceAndDeltas(marketData, date,prix, std_dev, deltas, stdDeltas, 0.1);
+    
+    this->mc_->priceAndDeltas(marketData, date,prix, std_dev, deltas, stdDeltas, this->epsilon_);
     
     if (date == 0){
         this->portfolio_->ChangeAllQuantities(marketData, deltas, date, prix);
@@ -42,11 +44,10 @@ void Hedger::RebalanceOnce(int date, PnlMat* marketData){
         this->portfolio_->ChangeAllQuantities(marketData, deltas, date);
     }
 
-    Position position(date, prix, std_dev, deltas, stdDeltas, this->portfolio_->value);
-    position.print();
-    this->portfolio_->positions.push_back(position);
-    pnl_vect_free(&deltas);
-    pnl_vect_free(&stdDeltas);     
+    Position position(date, prix, std_dev, pnl_vect_copy(deltas), pnl_vect_copy(stdDeltas), this->portfolio_->value);
+    this->positions.push_back(position);
+    // pnl_vect_free(&deltas);
+    // pnl_vect_free(&stdDeltas);     
 }
 
 PnlMat *Hedger::ExtractMarketData(int date){
@@ -81,41 +82,9 @@ PnlMat *Hedger::ExtractMarketData(int date){
 }
 
 
-PnlMat *Hedger::ExtractCsv(string name, vector<int> marketsize){
+PnlMat *Hedger::ExtractCsv(char* name, vector<int> marketsize){
 
-    // Parser le csv
-
-    std::ifstream  data(name);
-    std::string line;
-    int nbLine = 0;
-    int nbCol = 0;
-
-    std::vector<std::vector<double> > parsedCsv;
-    while(std::getline(data,line))
-    {
-        std::stringstream lineStream(line);
-        std::string cell;
-        std::vector<double> parsedRow;
-        while(std::getline(lineStream,cell,','))
-        {
-            parsedRow.push_back(stod(cell));
-
-            if(nbLine == 0){
-                nbCol++;
-            }
-        }
-
-        parsedCsv.push_back(parsedRow);
-        nbLine++;
-    }
-
-    PnlMat *marketData = pnl_mat_create_from_zero(nbLine, nbCol);
-
-    for(int i = 0; i < nbLine; i++){
-        for(int j = 0; j < nbCol; j++){
-            pnl_mat_set(marketData, i, j, parsedCsv[i][j]);
-        }
-    }
+    PnlMat *marketData = pnl_mat_create_from_file(name);
 
     int nbAsset = std::accumulate(marketsize.begin(), marketsize.end(), 0);
 
@@ -128,6 +97,6 @@ PnlMat *Hedger::ExtractCsv(string name, vector<int> marketsize){
         }
         col += marketsize[i];
     }
-
+    
     return marketData;
 }
