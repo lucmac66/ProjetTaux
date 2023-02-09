@@ -19,7 +19,7 @@ class BlackScholesModel
     vector<RiskyAsset*> assets_;
     vector<Currency*> currencies_;
     PnlVect* importantDates_;
-    int year_;
+    int year_; ///number of days in a year
 
     BlackScholesModel(PnlVect* importantDates, vector<RiskyAsset*> assets, vector<Currency*> currencies, int year);
 

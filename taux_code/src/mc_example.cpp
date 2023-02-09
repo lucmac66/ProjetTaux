@@ -20,10 +20,10 @@
 #include "pnl/pnl_matrix.h"
 
 int main(int argc, char **argv) {
-    // if (argc > 0) {
-    //      std::cerr << "Wrong number of arguments. Exactly one argument is required" << std::endl;
-    //      std::exit(0);
-    // }
+    if (argc != 3) {
+        std::cerr << "Wrong number of arguments. Exactly one argument is required" << std::endl;
+        std::exit(0);
+    }
 
     std::ifstream ifs(argv[1]);
     nlohmann::json jsonParams = nlohmann::json::parse(ifs);
@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
     pnl_mat_chol(correlation);
 
     map<string, int> mapping;
+    map<string, int> marketsize;
     vector<Currency*> currencies;
     std::cout << "-- currencies" << std::endl;
 
@@ -54,6 +55,7 @@ int main(int argc, char **argv) {
             double foreignRate = jsonCurrency.at("InterestRate").get<double>();
             currencies.push_back(new Currency(domesticRate, foreignRate, pnl_vect_create_from_zero(correlation->m)));
             mapping[currencyId] = market;
+            marketsize[currencyId] = 0;
             market++;
         }
         else{
@@ -62,6 +64,7 @@ int main(int argc, char **argv) {
             currencies.push_back(new Currency(domesticRate, foreignRate, sigma));
             if (mapping.find(currencyId) == mapping.end()){
                 mapping[currencyId] = market;
+                marketsize[currencyId] = 0;
                 market++;
             }
         }
@@ -74,12 +77,19 @@ int main(int argc, char **argv) {
     for (auto jsonAsset : jsonAssets) {
         string id = jsonAsset.at("CurrencyId").get<std::string>();
         pnl_mat_get_col(sigma, correlation, col);
-        assets.push_back(new RiskyAsset(currencies[mapping[id]], sigma));
+        RiskyAsset *asset = new RiskyAsset(currencies[mapping[id]], sigma);
+        assets.push_back(asset);
+        marketsize[id] += 1;
 
     }
-
     currencies.erase(currencies.begin());
 
+    vector<int> sizemarket;
+    map<string, int>::iterator itr;
+    for(itr=marketsize.begin();itr!=marketsize.end();itr++)
+    {
+        sizemarket.push_back(itr->second);
+    }
 
     int numberOfDaysPerYear = jsonParams.at("NumberOfDaysInOneYear").get<int>();
     int maturity = jsonParams.at("Option").at("MaturityInDays").get<int>();
@@ -87,24 +97,25 @@ int main(int argc, char **argv) {
     Option *opt;
     if(label == "call_currency"){
         double strike = jsonParams.at("Option").at("Strike").get<int>();
-        opt = new CallCurrency(maturity, strike, domesticRate, currencies[0]->foreignRate_, numberOfDaysPerYear);
+        opt = new CallCurrency(maturity, strike, domesticRate, currencies[0]->foreignRate_, numberOfDaysPerYear, sizemarket);
     }else{
         if(label == "call_quanto"){
             double strike = jsonParams.at("Option").at("Strike").get<int>();
-            opt = new CallQuanto(maturity, strike, domesticRate, numberOfDaysPerYear);
+            opt = new CallQuanto(maturity, strike, domesticRate, numberOfDaysPerYear, sizemarket);
         }
         else{
             if(label == "foreign_asian"){
-                opt = new ForeignAsian(maturity, domesticRate, numberOfDaysPerYear);
+                opt = new ForeignAsian(maturity, domesticRate, numberOfDaysPerYear, sizemarket);
             }
             else{
                 if(label == "quanto_exchange"){
                     double strike = jsonParams.at("Option").at("Strike").get<int>();
-                    opt = new QuantoExchange(maturity, strike, domesticRate, numberOfDaysPerYear);
+                    opt = new QuantoExchange(maturity, strike, domesticRate, numberOfDaysPerYear, sizemarket);
                 }
                 else{
                     double strike = jsonParams.at("Option").at("Strike").get<int>();
-                    opt = new QuantoExchange(maturity, strike, domesticRate, numberOfDaysPerYear);
+                    
+                    opt = new ForeignPerfBasket(maturity, strike, domesticRate, numberOfDaysPerYear, sizemarket);
                 }
             }
         }
@@ -140,7 +151,7 @@ int main(int argc, char **argv) {
         rebalancing = new GridRebalancing(dates);
     }
 
-    Hedger *hedger = new Hedger(portfolio, argv[2], mc, rebalancing);
+    Hedger *hedger = new Hedger(portfolio, argv[2], mc, rebalancing, sizemarket);
     hedger->RebalanceAll();
 
     pnl_mat_free(&correlation);

@@ -1,9 +1,10 @@
 #include "ForeignAsian.hpp"
 
-ForeignAsian::ForeignAsian(double T, double domestricRate, int year){
+ForeignAsian::ForeignAsian(double T, double domestricRate, int year, vector<int> sizemarket){
     this->T_ = T;
     this->domesticRate_ = domestricRate;
     this->year_ = year;
+    this->sizemarket_ = sizemarket; 
 }
 
 double ForeignAsian::payoff(const PnlMat* path, double t){

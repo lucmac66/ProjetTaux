@@ -26,8 +26,8 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
     for (int i = 0; i < nbSamples_; i++){
         mod_->asset(path, past, t,  rng_);
         payoff = opt_->payoff(path, t);
-        std::cout << " " << std::endl;
-        pnl_mat_print(path);
+        // std::cout << " " << std::endl;
+        // pnl_mat_print(path);
         prix += payoff;
         std_dev += payoff * payoff;
         for (int j = 0; j < path->n; j++){

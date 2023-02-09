@@ -1,10 +1,11 @@
 #include "QuantoExchange.hpp"
 
-QuantoExchange::QuantoExchange(double T, double strike, double domestricRate, int year){
+QuantoExchange::QuantoExchange(double T, double strike, double domestricRate, int year, vector<int> sizemarket){
     this->T_ = T;
     this->strike_ = strike;
     this->domesticRate_ = domestricRate;
     this->year_ = year;
+    this->sizemarket_ = sizemarket; 
 }
 
 double QuantoExchange::payoff(const PnlMat* path, double t){

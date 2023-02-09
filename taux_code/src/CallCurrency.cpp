@@ -1,11 +1,12 @@
 #include "CallCurrency.hpp"
 
-CallCurrency::CallCurrency(double T, double strike, double domestricRate, double foreignRate, int year){
+CallCurrency::CallCurrency(double T, double strike, double domestricRate, double foreignRate, int year, vector<int> sizemarket){
     this->T_ = T;
     this->strike_ = strike;
     this->domesticRate_ = domestricRate;
     this->foreignRate_ = foreignRate;
     this->year_ = year;
+    this->sizemarket_ = sizemarket; 
 }
 
 double CallCurrency::payoff(const PnlMat* path, double t){

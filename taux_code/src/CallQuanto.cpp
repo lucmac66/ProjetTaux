@@ -1,10 +1,11 @@
 #include "CallQuanto.hpp"
 
-CallQuanto::CallQuanto(double T, double strike, double domestricRate, int year){
+CallQuanto::CallQuanto(double T, double strike, double domestricRate, int year, vector<int> sizemarket){
     this->T_ = T;
     this->strike_ = strike;
     this->domesticRate_ = domestricRate;
     this->year_ = year;
+    this->sizemarket_ = sizemarket; 
 }
 
 double CallQuanto::payoff(const PnlMat* path, double t){

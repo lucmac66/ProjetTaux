@@ -6,6 +6,6 @@ class CallCurrency: public Option{
     double strike_;
     double foreignRate_;
 
-    CallCurrency(double T, double strike, double domesticRate, double foreignRate, int year);
+    CallCurrency(double T, double strike, double domesticRate, double foreignRate, int year, vector<int> sizemarket);
     double payoff(const PnlMat *path, double t);
 };

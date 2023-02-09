@@ -47,7 +47,7 @@ void BlackScholesModel::asset(PnlMat* path, const PnlMat *past, double t, PnlRng
             ///remplissage pour les Stildes
             for (int j = 0; j < assets_.size(); j++){
                 double st = pnl_mat_get(past, past->m-1, j);
-                std::cout << exp(assets_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G)) << std::endl;
+                // std::cout << exp(assets_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G)) << std::endl;
                 st *= exp(assets_[j]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G));
                 pnl_mat_set(path, i, j, st);
             }

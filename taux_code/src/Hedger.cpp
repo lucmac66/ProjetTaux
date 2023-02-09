@@ -2,10 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <numeric>
 
-Hedger::Hedger(Portfolio *portfolio, string csvDocName, MonteCarlo *mc, Rebalancing *rebalancingTool){
+Hedger::Hedger(Portfolio *portfolio, string csvDocName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize){
     this->portfolio_ = portfolio;
-    this->marketData_ = ExtractCsv(csvDocName);
+    this->marketData_ = ExtractCsv(csvDocName, marketsize);
     this->mc_ = mc;
     this->rebalancingTool_ = rebalancingTool;
 }
@@ -14,7 +15,7 @@ void Hedger::RebalanceAll(){
     PnlMat * past = ExtractMarketData(0);
     RebalanceOnce(0, past);
     pnl_mat_free(&past);
-    for(int jour = 1; jour < this->mc_->opt_->T_; jour++){
+    for(int jour = 1; jour < this->marketData_->m - 1; jour++){
         std::cout << " " << std::endl;
         if (rebalancingTool_->IsRebalanceDate(jour)){
             PnlMat * past = ExtractMarketData(jour);
@@ -74,11 +75,13 @@ PnlMat *Hedger::ExtractMarketData(int date){
     pnl_mat_set_row(past, row, nbDates - 1);
 
     pnl_vect_free(&row);
-    
+
     return past;
+
 }
 
-PnlMat *Hedger::ExtractCsv(string name){
+
+PnlMat *Hedger::ExtractCsv(string name, vector<int> marketsize){
 
     // Parser le csv
 
@@ -112,6 +115,18 @@ PnlMat *Hedger::ExtractCsv(string name){
         for(int j = 0; j < nbCol; j++){
             pnl_mat_set(marketData, i, j, parsedCsv[i][j]);
         }
+    }
+
+    int nbAsset = std::accumulate(marketsize.begin(), marketsize.end(), 0);
+
+    for(int i = 0; i < marketData->m; i++){
+        int col = marketsize[0];
+        for(int k = 1; k < marketsize.size(); k++){
+            for(int j = col; j < col + marketsize[k]; j++){
+                pnl_mat_set(marketData, i, j, pnl_mat_get(marketData, i, j) * pnl_mat_get(marketData, i, nbAsset + k - 1) );
+            }
+        }
+        col += marketsize[i];
     }
     
     return marketData;

@@ -1,76 +1,66 @@
-// #include "ForeignPerfBasket.hpp"
+#include "ForeignPerfBasket.hpp"
 
-// ForeignPerfBasket::ForeignPerfBasket(double T, int n, double strike, map<Currency, map<int, RiskyAsset>> foreignCurrencies, map<Currency, RiskyAsset> domesticCurrency, int dates [], int size){
-//     T_ = T;
-//     n_ = n;
-//     strike_ = strike;
-//     foreignCurrencies_ = foreignCurrencies;
-//     domesticCurrency_ = domesticCurrency;
-//     dates_ = dates;
-//     int indexes [n_] = { 0 };
-//     indices_ = indexes;
-//     sizes_ = size;
-// }
+ForeignPerfBasket::ForeignPerfBasket(double T, double strike, double domestricRate, int year, vector<int> sizemarket){
+    this->T_ = T;
+    this->strike_ = strike;
+    this->domesticRate_ = domestricRate;
+    this->year_ = year;
+    this->sizemarket_ = sizemarket; 
+}
 
-// double
-// ForeignPerfBasket::payoff(const int* path){
-//     ///numéro de colonne
-//     int col = 0;
+double ForeignPerfBasket::payoff(const PnlMat *path, double t){
+    double payoff = 0;
+    int imax;
+    double ratio = 0;
+    int col = sizemarket_[0];
+    int nbAsset = std::accumulate(sizemarket_.begin(), sizemarket_.end(), 0);
+    for(int i = 1; i < sizemarket_.size(); i++){
 
-//     ///on calcule la moyenne des actifs domestiques
-//     double moyenne_dom = 0;
-//     for (int j = 0; j < sizes_[0]; j++){
-//         moyenne_dom += pnl_mat_get(path, path->m - 1, j);
-//         col++;
-//     }
-//     moyenne_dom /= sizes_[0];
+        double somme_foreign_t1 = 0;
+        double somme_foreign_t2 = 0;
 
-//     ///on déclare le numéro de la devise qui réalise le max dans un entier
-//     int max_currency;
-//     double ratio = 0;
+        for(int j = col; j < col + sizemarket_[i]; j++){
+            somme_foreign_t1 += pnl_mat_get(path, 0, j) / pnl_mat_get(path, 0, nbAsset + i - 1) ;
+            somme_foreign_t2 += pnl_mat_get(path, 1, j) / pnl_mat_get(path, 1, nbAsset + i - 1);
+        }
 
-//     ///on calcule les ratios et on attribue max_currency à la devise qui réalise le max
-//     for (int i = 1; i < sizes_.size(); i++){
-//         double somme_foreign_t1 = 0;
-//         double somme_foreign_t2 = 0;
+        if(somme_foreign_t2 / somme_foreign_t1 > ratio){
+            imax = i;
+            ratio = somme_foreign_t2 / somme_foreign_t1;
+        }
+        col += sizemarket_[i];
+    }
 
-//         ///somme au temps t2
-//         for (int j = 0; j < sizes_[i]; j++){
-//             somme_foreign_t1 += pnl_mat_get(path, path->m - 1, col + j);
-//         }
+    double moyenne_dom = 0;
+    double moyenne_foreign = 0;
 
-//         ///somme au temps t1
-//         for (int j = 0; j < sizes_[i]; j++){
-//             somme_foreign_t2 += pnl_mat_get(path, path->m - 1, col + j);
-//         }
+    col = 0;
+    for(int i = 0; i < sizemarket_.size(); i++){
+        if(i == 0){
+            for(int j = col; j < col + sizemarket_[0]; j++){
+                moyenne_dom += pnl_mat_get(path, path->m-1, j);
+            }
+            moyenne_dom /= sizemarket_[0];
+        }
+        else{
+            if(i == imax){
+                for(int j = col; j < col + sizemarket_[imax]; j++){
+                    moyenne_foreign += pnl_mat_get(path, path->m-1, j);
+                }
+                moyenne_foreign /= sizemarket_[imax];
 
-//         ///on incrémente la colonne
-//         col += sizes_[i];
+            }
+        }
+        col += sizemarket_[i];
+    }
 
-//         ///vérification de la condition de la max currency
-//         if (somme_foreign_t2/somme_foreign_t1 > ratio){
-//             max_currency = i;
-//         }
-//     }
+    if(moyenne_foreign > moyenne_dom + strike_){
+        payoff = moyenne_foreign - moyenne_dom - strike_;
+        return exp(this->domesticRate_ * (t - this->T_)/ this->year_) * payoff;
+    }
+    else{
+        return 0;
+    }
 
-//     ///calcul de la moyenne arithmétique de la max currency en t
-//     double moyenne_for = 0;
-//     int colonne = 0; ///on recherche la colonne correspondante
-//     for int(j = 0; j<i; j++){
-//             colonne += sizes_[j];
-//         }
-//     for (int j = 0; j < sizes_[max_currency]; j++){
-//         moyenne_for += pnl_mat_get(path, path->m - 1, colonne + j);
-//     }
-//     moyenne_for /= sizes_[max_currency];
+}
 
-//     ///calcul du payoff
-//     if (moyenne_for - moyenne_dom - strike_ > 0){
-//         return moyenne_for - moyenne_dom - strike_;
-//     }
-
-//     else{
-//         return 0;
-//     }
-
-// }

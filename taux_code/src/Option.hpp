@@ -2,6 +2,10 @@
 
 #include "pnl/pnl_vector.h"
 #include "pnl/pnl_matrix.h"
+#include <iostream>
+#include <vector>
+
+using namespace std;
 
 /// \brief Classe Option abstraite
 class Option
@@ -9,7 +13,10 @@ class Option
   public:
     double T_;        /// maturité
     double domesticRate_; 
+
     int year_;  
+    vector<int> sizemarket_;
+
     /**
      * Calcule la valeur du payoff sur la trajectoire
      *
