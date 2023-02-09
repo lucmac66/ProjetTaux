@@ -2,7 +2,6 @@
 
 
 RiskyAsset::RiskyAsset(Currency *currency, PnlVect* corr, double sigma){
-    this->currency_ = currency;
     this->sigma_ = pnl_vect_new();
     pnl_vect_clone(sigma_, corr);
     pnl_vect_mult_scalar(this->sigma_, sigma);

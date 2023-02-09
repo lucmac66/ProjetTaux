@@ -61,13 +61,13 @@ void BlackScholesModel::asset(PnlMat* path, const PnlMat *past, double t, PnlRng
             ///remplissage pour les Stildes
 
             for (int j = 0; j < assets_.size(); j++){
-                double st = pnl_mat_get(past, past->m-1, j);
+                double st = pnl_mat_get(path, i-1, j);
                 st *= exp(assets_[j]->drift_ * dt + sqrt(dt) * pnl_vect_scalar_prod(assets_[j]->sigma_, G));
                 pnl_mat_set(path, i, j, st);
             }
             /// remplissage pour les Xi
             for (int j = assets_.size(); j < assets_.size() + currencies_.size(); j++){
-                double st = pnl_mat_get(past, past->m-1, j);
+                double st = pnl_mat_get(path, i-1, j);
                 st *= exp(currencies_[j-assets_.size()]->drift_ *dt + sqrt(dt) * pnl_vect_scalar_prod(currencies_[j-assets_.size()]->sigma_, G));
                 pnl_mat_set(path, i, j, st);
             }

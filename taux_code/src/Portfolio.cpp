@@ -42,4 +42,3 @@ void Portfolio::ChangeAllQuantities(const PnlMat *values, const PnlVect * deltas
     this->lastRebalance = t;
 }
 
-

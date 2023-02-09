@@ -6,7 +6,6 @@
 
 class RiskyAsset{
     public:
-    Currency *currency_;
     double drift_;
     PnlVect *sigma_;
 
