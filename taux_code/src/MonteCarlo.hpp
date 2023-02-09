@@ -4,6 +4,7 @@
 #include "BlackScholesModel.hpp"
 #include "pnl/pnl_random.h"
 #include "math.h"
+#include <numeric>
 
 class MonteCarlo
 {

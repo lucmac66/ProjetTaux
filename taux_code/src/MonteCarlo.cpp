@@ -14,10 +14,10 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
     PnlMat* path = pnl_mat_create(this->mod_->importantDates_->size, past->n);
     PnlMat* pathEpsilonP = pnl_mat_create(this->mod_->importantDates_->size, past->n);
     PnlMat* pathEpsilonN = pnl_mat_create(this->mod_->importantDates_->size, past->n);
-
+    
     ///initialisation price et std dev
 
-
+    int nbAsset = std::accumulate(this->opt_->sizemarket_.begin(), this->opt_->sizemarket_.end(), 0);
     prix = 0;
     std_dev = 0;
     double payoff;
@@ -31,14 +31,15 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
         prix += payoff;
         std_dev += payoff * payoff;
         for (int j = 0; j < path->n; j++){
-            pnl_mat_clone(pathEpsilonP, path);
-            pnl_mat_clone(pathEpsilonN, path);
-            mod_->shiftAsset(pathEpsilonP, past, epsilon, t, j);
-            mod_->shiftAsset(pathEpsilonN, past, -epsilon, t, j);
-
-            deltapayoff = opt_->payoff(pathEpsilonP, t) - opt_->payoff(pathEpsilonN, t);
-            pnl_vect_set(deltas, j, pnl_vect_get(deltas, j) + deltapayoff);
-            pnl_vect_set(stdDeltas, j, pnl_vect_get(stdDeltas, j) + deltapayoff*deltapayoff);            
+            if(j < nbAsset){
+                pnl_mat_clone(pathEpsilonP, path);
+                pnl_mat_clone(pathEpsilonN, path);
+                mod_->shiftAsset(pathEpsilonP, past, epsilon, t, j);
+                mod_->shiftAsset(pathEpsilonN, past, -epsilon, t, j);
+                deltapayoff = opt_->payoff(pathEpsilonP, t) - opt_->payoff(pathEpsilonN, t);
+                pnl_vect_set(deltas, j, pnl_vect_get(deltas, j) + deltapayoff);
+                pnl_vect_set(stdDeltas, j, pnl_vect_get(stdDeltas, j) + deltapayoff*deltapayoff); 
+            }            
         }
 
     }

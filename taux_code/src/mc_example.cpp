@@ -35,6 +35,8 @@ int main(int argc, char **argv) {
     jsonParams.at("Correlations").get_to(correlation);
     pnl_mat_chol(correlation);
 
+    pnl_mat_print(correlation);
+
     map<string, int> mapping;
     map<string, int> marketsize;
     vector<Currency*> currencies;
@@ -84,6 +86,7 @@ int main(int argc, char **argv) {
         RiskyAsset *asset = new RiskyAsset(currencies[mapping[id]], corr, sigma);
         assets.push_back(asset);
         marketsize[id] += 1;
+        col++;
 
     }
     currencies.erase(currencies.begin());

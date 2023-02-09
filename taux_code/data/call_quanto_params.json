@@ -37,20 +37,20 @@
     "MaturityInDays": 378
   },
   "Correlations": [
-    [ 1, 0.1],
-    [ 0.1, 1]
+    [ 1, 0.2],
+    [ 0.2, 1]
   ],
   "SampleNb": 50000,
   "RelativeFiniteDifferenceStep": 0.1,
   "benchmarkResults": {
-    "price": 2.473612296812984,
-    "priceStdDev": 0.018389156738532513,
+    "price": 2.5267926694479845,
+    "priceStdDev": 0.019188935623942447,
     "deltas": [
-      0.6797574886930439,
+      0.6758117144060063,
       0.0
     ],
     "deltaStdDev": [
-      0.0032021025921019023,
+      0.003270496267057505,
       0.0
     ]
   }

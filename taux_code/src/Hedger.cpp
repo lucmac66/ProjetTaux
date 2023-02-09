@@ -18,13 +18,11 @@ void Hedger::RebalanceAll(){
     RebalanceOnce(0, past);
     pnl_mat_free(&past);
     for(int jour = 1; jour < this->marketData_->m; jour++){
-        std::cout << " " << std::endl;
         if (rebalancingTool_->IsRebalanceDate(jour)){
             PnlMat * past = ExtractMarketData(jour);
             RebalanceOnce(jour, past);
             pnl_mat_free(&past);
         }
-
     } 
 }
 
@@ -32,8 +30,8 @@ void Hedger::RebalanceOnce(int date, PnlMat* marketData){
 
     double prix = 0;
     double std_dev = 0;
-    PnlVect *deltas = pnl_vect_create(this->portfolio_->quantity->size);
-    PnlVect *stdDeltas = pnl_vect_create(deltas->size);
+    PnlVect *deltas = pnl_vect_create_from_zero(this->portfolio_->quantity->size);
+    PnlVect *stdDeltas = pnl_vect_create_from_zero(deltas->size);
     this->mc_->priceAndDeltas(marketData, date,prix, std_dev, deltas, stdDeltas, 0.1);
     std::cout << "---------------" << std::endl;
     std::cout << "date :" << date << std::endl;
@@ -68,6 +66,10 @@ PnlMat *Hedger::ExtractMarketData(int date){
 
     if(pnl_vect_get(this->mc_->mod_->importantDates_, nbDates) != date){
         nbDates++;
+    }else{
+        if(pnl_vect_get(this->mc_->mod_->importantDates_, this->mc_->mod_->importantDates_->size-1) == date){
+            nbDates = 1;
+        }
     }
 
     // Creation du market Data
@@ -120,7 +122,6 @@ PnlMat *Hedger::ExtractCsv(string name, vector<int> marketsize){
         nbLine++;
     }
 
-    std::cout << nbLine << std::endl;
     PnlMat *marketData = pnl_mat_create_from_zero(nbLine, nbCol);
 
     for(int i = 0; i < nbLine; i++){
@@ -140,6 +141,5 @@ PnlMat *Hedger::ExtractCsv(string name, vector<int> marketsize){
         }
         col += marketsize[i];
     }
-    
     return marketData;
 }
