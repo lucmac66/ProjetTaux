@@ -1,22 +1,44 @@
 #include "Portfolio.hpp"
 #include <iostream>
-Portfolio::Portfolio(int n){
+#include <cmath>
+
+Portfolio::Portfolio(int n, int nbDays, double rate){
     this->freeRiskQuantity = 0;
     this->quantity = pnl_vect_create_from_zero(n);
     this->value = 0;
+    this->rate_ = rate;
+    this->nbDays_ = nbDays;
+    this->lastRebalance = 0;
+
 }
 
 void Portfolio::ChangeAllQuantities(const PnlMat *values, const PnlVect * deltas, int t){
-    double capitalisation = 1; // exp à faire
+    double capitalisation = exp(this->rate_ * (t - this-> lastRebalance) / this->nbDays_); 
     this->freeRiskQuantity *= capitalisation;
+    this->value = this->freeRiskQuantity;
+    double price = 0;
+    for (int i = 0; i < this->quantity->size; i++){
+        double delta_i_plus = pnl_vect_get(deltas, i);
+        double delta_i_moins = pnl_vect_get(this->quantity, i);
+        double value = pnl_mat_get(values, values->m-1, i);
+        this->freeRiskQuantity += value * (delta_i_moins - delta_i_plus);
+        pnl_vect_set(this->quantity, i, delta_i_plus);
+        price += value * delta_i_moins;
+    }
+    this->value += price;
+    this->lastRebalance = t;
+}
+
+void Portfolio::ChangeAllQuantities(const PnlMat *values, const PnlVect * deltas, int t, double prix){
+
     double price = 0;
     for (int i = 0; i < this->quantity->size; i++){
         double delta = pnl_vect_get(deltas, i);
         double value = pnl_mat_get(values, values->m-1, i);
-        this->freeRiskQuantity += value * (pnl_vect_get(this->quantity, i) - delta);
         pnl_vect_set(this->quantity, i, delta);
         price += value * delta;
     }
+    this->freeRiskQuantity = prix - price;
     this->value = price + this->freeRiskQuantity;
     this->lastRebalance = t;
 }

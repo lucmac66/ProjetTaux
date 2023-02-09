@@ -10,5 +10,5 @@ class RiskyAsset{
     double drift_;
     PnlVect *sigma_;
 
-    RiskyAsset(Currency *currency, PnlVect *sigma);   
+    RiskyAsset(Currency *currency, PnlVect *corr, double sigma);   
 };

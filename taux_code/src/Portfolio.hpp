@@ -10,7 +10,10 @@ class Portfolio
         PnlVect *quantity;
         double value;
         int lastRebalance;
+        double rate_;
+        int nbDays_;
         
-        Portfolio(int n);
+        Portfolio(int n, int nbDays, double rate);
         void ChangeAllQuantities(const PnlMat *values, const PnlVect *deltas, int t);
+        void ChangeAllQuantities(const PnlMat *values, const PnlVect *deltas, int t, double prix);
 };

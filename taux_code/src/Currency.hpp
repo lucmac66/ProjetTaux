@@ -12,6 +12,6 @@ class Currency{
     double foreignRate_;
     double drift_;
     PnlVect* sigma_;
-    Currency(string id, double domesticRate, double foreignRate, PnlVect* sigma);
+    Currency(string id, double domesticRate, double foreignRate, PnlVect* corr, double sigma);
 };
 

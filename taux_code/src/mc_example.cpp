@@ -52,16 +52,18 @@ int main(int argc, char **argv) {
         if (currencyId == domesticCurrencyId){
             domesticRate = jsonCurrency.at("InterestRate").get<double>();
             double foreignRate = jsonCurrency.at("InterestRate").get<double>();
-            currencies.push_back(new Currency(currencyId, domesticRate, foreignRate, pnl_vect_create_from_zero(correlation->m)));
+            double sigma = jsonCurrency.at("Volatility").get<double>();
+            currencies.push_back(new Currency(currencyId, domesticRate, foreignRate, pnl_vect_create_from_zero(correlation->m), sigma));
             mapping[currencyId] = market;
             marketsize[currencyId] = 0;
             market++;
         }
         else{
-            PnlVect* sigma = pnl_vect_create_from_zero(correlation->m);
+            PnlVect* corr = pnl_vect_create_from_zero(correlation->m);
             double foreignRate = jsonCurrency.at("InterestRate").get<double>();
-            pnl_mat_get_col(sigma, correlation, market + assetNb - 1);
-            currencies.push_back(new Currency(currencyId, domesticRate, foreignRate, sigma));
+            pnl_mat_get_col(corr, correlation, market + assetNb - 1);
+            double sigma = jsonCurrency.at("Volatility").get<double>();
+            currencies.push_back(new Currency(currencyId, domesticRate, foreignRate, corr, sigma));
             if (mapping.find(currencyId) == mapping.end()){
                 mapping[currencyId] = market;
                 marketsize[currencyId] = 0;
@@ -75,10 +77,11 @@ int main(int argc, char **argv) {
     int col = 0;
     auto jsonAssets = jsonParams.at("Assets");
     for (auto jsonAsset : jsonAssets) {
-        PnlVect* sigma = pnl_vect_create_from_zero(correlation->m);
+        PnlVect* corr = pnl_vect_create_from_zero(correlation->m);
         string id = jsonAsset.at("CurrencyId").get<std::string>();
-        pnl_mat_get_col(sigma, correlation, col);
-        RiskyAsset *asset = new RiskyAsset(currencies[mapping[id]], sigma);
+        double sigma = jsonAsset.at("Volatility").get<double>();
+        pnl_mat_get_col(corr, correlation, col);
+        RiskyAsset *asset = new RiskyAsset(currencies[mapping[id]], corr, sigma);
         assets.push_back(asset);
         marketsize[id] += 1;
 
@@ -130,7 +133,7 @@ int main(int argc, char **argv) {
     int nbSample;
     jsonParams.at("SampleNb").get_to(nbSample);
 
-    Portfolio *portfolio = new Portfolio(assetNb+currNb-1);
+    Portfolio *portfolio = new Portfolio(assetNb+currNb-1, numberOfDaysPerYear, domesticRate);
     BlackScholesModel *bs = new BlackScholesModel(importantDates, assets, currencies, numberOfDaysPerYear);
 
 

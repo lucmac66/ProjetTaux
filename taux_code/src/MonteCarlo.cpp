@@ -44,11 +44,11 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
     }
     for (int j = 0; j < path->n; j++){
         pnl_vect_set(deltas, j, pnl_vect_get(deltas, j)/ (2*epsilon*nbSamples_));
-        pnl_vect_set(stdDeltas, j, sqrt(abs(pnl_vect_get(stdDeltas, j)/ (2*epsilon*nbSamples_) - pnl_vect_get(deltas, j)*pnl_vect_get(deltas, j))));
+        pnl_vect_set(stdDeltas, j, sqrt(abs(pnl_vect_get(stdDeltas, j)/ (2*epsilon*nbSamples_) - pnl_vect_get(deltas, j)*pnl_vect_get(deltas, j))/ nbSamples_));
     }
 
     prix /= nbSamples_;
-    std_dev = sqrt(abs(std_dev/nbSamples_ - prix*prix));
+    std_dev = sqrt(abs(std_dev/nbSamples_ - prix*prix)/nbSamples_);
 
     pnl_mat_free(&path);
     pnl_mat_free(&pathEpsilonP);
