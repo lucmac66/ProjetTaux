@@ -1,7 +1,7 @@
 #include "Currency.hpp"
-#include <iostream>
 
-Currency::Currency(double domesticRate, double foreignRate, PnlVect *sigma){
+Currency::Currency(string id, double domesticRate, double foreignRate, PnlVect *sigma){
+    this->id_ = id;
     this->domesticRate_ = domesticRate;
     this->foreignRate_ = foreignRate;
     this->sigma_ = sigma;

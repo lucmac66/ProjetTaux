@@ -36,8 +36,11 @@ void Hedger::RebalanceOnce(int date, PnlMat* marketData){
     std::cout << "---------------" << std::endl;
     std::cout << "date :" << date << std::endl;
     std::cout << "prix :" << prix << std::endl;
+    std::cout << "std prix :" << std_dev << std::endl;
     std::cout << "deltas :" << std::endl;
     pnl_vect_print(deltas);
+    std::cout << "std deltas :" << std::endl;
+    pnl_vect_print(stdDeltas);
     this->portfolio_->ChangeAllQuantities(marketData, deltas, date);
     std::cout << "valeur portefeuille :" << this->portfolio_->value << std::endl;   
     pnl_vect_free(&deltas);

@@ -8,14 +8,18 @@
     {
       "id": "us_dollar",
       "InterestRate": 0.015,
-      "Volatility": 0.18
+      "Volatility": 0.18,
+      "Spot": 1.1,
+      "Drift": 0.05
     }
   ],
   "DomesticCurrencyId": "eur",
   "Assets": [
     {
       "CurrencyId": "us_dollar",
-      "Volatility": 0.3
+      "Volatility": 0.3,
+      "Spot": 10,
+      "Drift": 0.1
     }
   ],
   "NumberOfDaysInOneYear": 252,
@@ -33,9 +37,21 @@
     "MaturityInDays": 378
   },
   "Correlations": [
-    [ 1, 0.2],
+    [ 1, 0.1],
     [ 0.1, 1]
   ],
   "SampleNb": 50000,
-  "RelativeFiniteDifferenceStep": 0.1
+  "RelativeFiniteDifferenceStep": 0.1,
+  "benchmarkResults": {
+    "price": 2.473612296812984,
+    "priceStdDev": 0.018389156738532513,
+    "deltas": [
+      0.6797574886930439,
+      0.0
+    ],
+    "deltaStdDev": [
+      0.0032021025921019023,
+      0.0
+    ]
+  }
 }

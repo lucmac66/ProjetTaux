@@ -26,19 +26,19 @@ void MonteCarlo::priceAndDeltas(const PnlMat* past, double t, double& prix, doub
     for (int i = 0; i < nbSamples_; i++){
         mod_->asset(path, past, t,  rng_);
         payoff = opt_->payoff(path, t);
-        // std::cout << " " << std::endl;
+        // std::cout << i << " " << std::endl;
         // pnl_mat_print(path);
         prix += payoff;
         std_dev += payoff * payoff;
         for (int j = 0; j < path->n; j++){
-            pathEpsilonN = pnl_mat_copy(path);
-            pathEpsilonP = pnl_mat_copy(path);
+            pnl_mat_clone(pathEpsilonP, path);
+            pnl_mat_clone(pathEpsilonN, path);
             mod_->shiftAsset(pathEpsilonP, past, epsilon, t, j);
             mod_->shiftAsset(pathEpsilonN, past, -epsilon, t, j);
 
             deltapayoff = opt_->payoff(pathEpsilonP, t) - opt_->payoff(pathEpsilonN, t);
             pnl_vect_set(deltas, j, pnl_vect_get(deltas, j) + deltapayoff);
-            pnl_vect_set(stdDeltas, j, pnl_vect_get(stdDeltas, j) + deltapayoff);            
+            pnl_vect_set(stdDeltas, j, pnl_vect_get(stdDeltas, j) + deltapayoff*deltapayoff);            
         }
 
     }

@@ -45,7 +45,6 @@ int main(int argc, char **argv) {
     double domesticRate = 0;
 
     int market = 0;
-    PnlVect* sigma = pnl_vect_create_from_zero(correlation->m);
 
     auto jsonCurrencies = jsonParams.at("Currencies");
     for (auto jsonCurrency : jsonCurrencies) {
@@ -53,15 +52,16 @@ int main(int argc, char **argv) {
         if (currencyId == domesticCurrencyId){
             domesticRate = jsonCurrency.at("InterestRate").get<double>();
             double foreignRate = jsonCurrency.at("InterestRate").get<double>();
-            currencies.push_back(new Currency(domesticRate, foreignRate, pnl_vect_create_from_zero(correlation->m)));
+            currencies.push_back(new Currency(currencyId, domesticRate, foreignRate, pnl_vect_create_from_zero(correlation->m)));
             mapping[currencyId] = market;
             marketsize[currencyId] = 0;
             market++;
         }
         else{
+            PnlVect* sigma = pnl_vect_create_from_zero(correlation->m);
             double foreignRate = jsonCurrency.at("InterestRate").get<double>();
             pnl_mat_get_col(sigma, correlation, market + assetNb - 1);
-            currencies.push_back(new Currency(domesticRate, foreignRate, sigma));
+            currencies.push_back(new Currency(currencyId, domesticRate, foreignRate, sigma));
             if (mapping.find(currencyId) == mapping.end()){
                 mapping[currencyId] = market;
                 marketsize[currencyId] = 0;
@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
     int col = 0;
     auto jsonAssets = jsonParams.at("Assets");
     for (auto jsonAsset : jsonAssets) {
+        PnlVect* sigma = pnl_vect_create_from_zero(correlation->m);
         string id = jsonAsset.at("CurrencyId").get<std::string>();
         pnl_mat_get_col(sigma, correlation, col);
         RiskyAsset *asset = new RiskyAsset(currencies[mapping[id]], sigma);
@@ -135,7 +136,7 @@ int main(int argc, char **argv) {
 
     //random Initialisation
     PnlRng *rng = pnl_rng_create(PNL_RNG_MERSENNE);
-    pnl_rng_sseed(rng, (unsigned long)time(NULL));
+    pnl_rng_sseed(rng, time(NULL));
 
     std::cout << nbSample << std::endl;
     MonteCarlo *mc = new MonteCarlo(bs, opt, rng, nbSample);
