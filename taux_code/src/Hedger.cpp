@@ -3,14 +3,18 @@
 #include <fstream>
 #include <sstream>
 #include <numeric>
+#include <string>
 
 using namespace std;
 
-Hedger::Hedger(Portfolio *portfolio, string csvDocName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize){
+Hedger::Hedger(Portfolio *portfolio, string csvDocName, MonteCarlo *mc, Rebalancing *rebalancingTool, vector<int> marketsize, string jsonDocName){
     this->portfolio_ = portfolio;
     this->marketData_ = ExtractCsv(csvDocName, marketsize);
     this->mc_ = mc;
     this->rebalancingTool_ = rebalancingTool;
+    std::ifstream ifs(jsonDocName);
+    this->json = nlohmann::json::parse(ifs);
+
 }
 
 void Hedger::RebalanceAll(){
@@ -33,22 +37,16 @@ void Hedger::RebalanceOnce(int date, PnlMat* marketData){
     PnlVect *deltas = pnl_vect_create_from_zero(this->portfolio_->quantity->size);
     PnlVect *stdDeltas = pnl_vect_create_from_zero(deltas->size);
     this->mc_->priceAndDeltas(marketData, date,prix, std_dev, deltas, stdDeltas, 0.1);
-    std::cout << "---------------" << std::endl;
-    std::cout << "date :" << date << std::endl;
-    std::cout << "prix :" << prix << std::endl;
-    std::cout << "std prix :" << std_dev << std::endl;
-    std::cout << "deltas :" << std::endl;
-    pnl_vect_print(deltas);
-    std::cout << "std deltas :" << std::endl;
-    pnl_vect_print(stdDeltas);
+    
     if (date == 0){
         this->portfolio_->ChangeAllQuantities(marketData, deltas, date, prix);
     }
     else{
         this->portfolio_->ChangeAllQuantities(marketData, deltas, date);
     }
-    
-    std::cout << "valeur portefeuille :" << this->portfolio_->value << std::endl;   
+
+    Position *position = new Position(date, prix, std_dev, deltas, stdDeltas, this->portfolio_->value);
+    to_json(this->json, position);
     pnl_vect_free(&deltas);
     pnl_vect_free(&stdDeltas);     
 }

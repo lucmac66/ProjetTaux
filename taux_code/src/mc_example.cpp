@@ -20,7 +20,7 @@
 #include "pnl/pnl_matrix.h"
 
 int main(int argc, char **argv) {
-    if (argc != 3) {
+    if (argc != 4) {
         std::cerr << "Wrong number of arguments. Exactly one argument is required" << std::endl;
         std::exit(0);
     }
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
         rebalancing = new GridRebalancing(dates);
     }
 
-    Hedger *hedger = new Hedger(portfolio, argv[2], mc, rebalancing, sizemarket);
+    Hedger *hedger = new Hedger(portfolio, argv[2], mc, rebalancing, sizemarket, argv[3]);
     hedger->RebalanceAll();
 
     pnl_mat_free(&correlation);

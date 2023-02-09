@@ -49,12 +49,12 @@ Position::Position(int date, double price, double priceStdDev, PnlVect* deltas, 
 }
 
 void to_json(nlohmann::json &j, const Position &position) {
-    j["date"] = position->date;
-    j["value"] = position->portfolioValue;
-    j["price"] = position->price;
-    j["priceStdDev"] = position->priceStdDev;
-    j["deltas"] = position->deltas;
-    j["deltasStdDev"] = position->deltasStdDev;
+    j["date"] = position.date;
+    j["value"] = position.portfolioValue;
+    j["price"] = position.price;
+    j["priceStdDev"] = position.priceStdDev;
+    j["deltas"] = position.deltas;
+    j["deltasStdDev"] = position.deltasStdDev;
 }
 
 void Position::print() const {
