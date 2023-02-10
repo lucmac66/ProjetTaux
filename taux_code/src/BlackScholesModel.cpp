@@ -89,11 +89,13 @@ void BlackScholesModel::shiftAsset(PnlMat* path, const PnlMat* past, double epsi
             break;
         }
     }
-    
+
+    ///shift de St par St+epsilon
     double st = pnl_mat_get(past, past->m-1, column);
     double st_shift = st + epsilon;
     double change = st_shift / st;
 
+    ///génération des observations futures en les shiftant par epsilon
     for (int i = index; i < path->m; i++){
         double new_value = pnl_mat_get(path, i, column) * change;
         pnl_mat_set(path, i, column, new_value);

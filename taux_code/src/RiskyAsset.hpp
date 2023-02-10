@@ -6,8 +6,15 @@
 
 class RiskyAsset{
     public:
-    double drift_;
-    PnlVect *sigma_;
+    double drift_;   /*! drift de l'asset risqué */
+    PnlVect *sigma_; /*! vecteur de volatilité */
 
+    /**
+     * Constructeur de la classe RiskyAsset
+     *
+     * @param currency
+     * @param corr
+     * @param sigma
+     */
     RiskyAsset(Currency *currency, PnlVect *corr, double sigma);   
 };

@@ -11,19 +11,17 @@ using namespace std;
 class Option
 {
   public:
-    double T_;        /// maturité
-    double domesticRate_; 
-
-    int year_;  
-    vector<int> sizemarket_;
+    double T_;               /*! maturité */
+    double domesticRate_;    /*! taux d'intérêt domestique */
+    int year_;               /*! nombre de jours dans l'année */
+    vector<int> sizemarket_; /*! tailles des marchés */
 
     /**
-     * Calcule la valeur du payoff sur la trajectoire
+     * Calcul du payoff
      *
-     * @param[in] path est une matrice de taille (N+1) x d
-     * contenant une trajectoire du modèle telle que créée
-     * par la fonction asset.
-     * @return phi(trajectoire)
+     * @param path matrice de la trajectoire simulée
+     * @param t temps auquel on calcule le payoff
+     * @return le payoff de l'option
      */
     virtual double payoff(const PnlMat* path, double t) = 0;
 };
