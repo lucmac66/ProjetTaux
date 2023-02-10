@@ -92,7 +92,7 @@ PnlMat *Hedger::ExtractCsv(char* name, vector<int> marketsize){
         int col = marketsize[0];
         for(int k = 1; k < marketsize.size(); k++){
             for(int j = col; j < col + marketsize[k]; j++){
-                pnl_mat_set(marketData, i, j, pnl_mat_get(marketData, i, j) * pnl_mat_get(marketData, i, nbAsset + k - 1) );
+                pnl_mat_set(marketData, i, j, pnl_mat_get(marketData, i, j) * pnl_mat_get(marketData, i, nbAsset + k - 1));
             }
         }
         col += marketsize[i];

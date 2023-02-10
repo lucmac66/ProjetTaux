@@ -8,40 +8,55 @@
     {
       "id": "us_dollar",
       "InterestRate": 0.015,
-      "Volatility": 0.18
+      "Volatility": 0.18,
+      "Spot": 1,
+      "Drift": 0.03
     },
     {
       "id": "pound",
       "InterestRate": 0.015,
-      "Volatility": 0.18
+      "Volatility": 0.18,
+      "Spot": 1,
+      "Drift": 0.04
     }
-
   ],
   "DomesticCurrencyId": "eur",
   "Assets": [
     {
       "CurrencyId": "eur",
-      "Volatility": 0.2
+      "Volatility": 0.2,
+      "Spot": 5,
+      "Drift": 0.1
     },
     {
       "CurrencyId": "us_dollar",
-      "Volatility": 0.3
+      "Volatility": 0.3,
+      "Spot": 10,
+      "Drift": 0.1
     },
     {
       "CurrencyId": "us_dollar",
-      "Volatility": 0.15
+      "Volatility": 0.15,
+      "Spot": 10,
+      "Drift": 0.1
     },
     {
       "CurrencyId": "pound",
-      "Volatility": 0.25
+      "Volatility": 0.25,
+      "Spot": 10,
+      "Drift": 0.1
     },
     {
       "CurrencyId": "pound",
-      "Volatility": 0.25
+      "Volatility": 0.25,
+      "Spot": 10,
+      "Drift": 0.1
     },
     {
       "CurrencyId": "pound",
-      "Volatility": 0.3
+      "Volatility": 0.3,
+      "Spot": 10,
+      "Drift": 0.1
     }
   ],
   "NumberOfDaysInOneYear": 252,
@@ -50,22 +65,23 @@
     "Period": 1
   },
   "Option": {
-    "Type": "foreign_asian",
+    "Type": "foreign_perf_basket",
     "FixingDatesInDays": {
       "Type": "Grid",
-      "DatesInDays": [ 126, 252 ]
+      "DatesInDays": [ 0, 63, 126 ]
     },
-    "MaturityInDays": 252
+    "MaturityInDays": 126,
+    "Strike": 4
   },
   "Correlations": [
-    [ 1, 0.3, 0.3, 0.3, 0.3, 0.3, 0, 0],
-    [ 0.3, 1, 0.3, 0.3, 0.3, 0.3, 0, 0],
-    [ 0.3, 0.3, 1, 0.3, 0.3, 0.3, 0, 0],
-    [ 0.3, 0.3, 0.3, 1, 0.3, 0.3, 0, 0],
-    [ 0.3, 0.3, 0.3, 0.3, 1, 0.3, 0, 0],
-    [ 0.3, 0.3, 0.3, 0.3, 0.3, 1, 0, 0],
-    [ 0, 0, 0, 0, 0, 0, 1, -0.2],
-    [ 0, 0, 0, 0, 0, 0, -0.2, 1]
+    [ 1, 0.3, 0.3, 0.3, 0.3, 0.3, 0.2, -0.2],
+    [ 0.3, 1, 0.3, 0.3, 0.3, 0.3, 0.2, -0.2],
+    [ 0.3, 0.3, 1, 0.3, 0.3, 0.3, 0.2, -0.2],
+    [ 0.3, 0.3, 0.3, 1, 0.3, 0.3, 0.2, -0.2],
+    [ 0.3, 0.3, 0.3, 0.3, 1, 0.3, 0.2, -0.2],
+    [ 0.3, 0.3, 0.3, 0.3, 0.3, 1, 0.2, -0.2],
+    [ 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 1, -0.2],
+    [ -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, -0.2, 1]
   ],
   "SampleNb": 50000,
   "RelativeFiniteDifferenceStep": 0.1

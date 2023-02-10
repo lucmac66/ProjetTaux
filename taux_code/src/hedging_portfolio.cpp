@@ -112,8 +112,8 @@ int main(int argc, char **argv) {
         else{
             if(label == "foreign_asian"){
                 int periodOption = jsonParams.at("Option").at("FixingDatesInDays").at("Period").get<int>();
-                importantDates = pnl_vect_create_from_zero((int)(maturity/periodOption));
-                int comp = periodOption;
+                importantDates = pnl_vect_create_from_zero((int)(maturity/periodOption) + 1);
+                int comp = 0;
                 for(int i = 0; i < importantDates->size; i++){
                     pnl_vect_set(importantDates, i, (int)(comp));
                     comp += periodOption;
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
     int nbSample;
     jsonParams.at("SampleNb").get_to(nbSample);
 
-    Portfolio *portfolio = new Portfolio(assetNb+currNb-1, numberOfDaysPerYear, domesticRate);
+    Portfolio *portfolio = new Portfolio(assetNb+currNb-1, numberOfDaysPerYear, domesticRate, assets, currencies);
     BlackScholesModel *bs = new BlackScholesModel(importantDates, assets, currencies, numberOfDaysPerYear);
 
     //random Initialisation
